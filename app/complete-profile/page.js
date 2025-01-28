@@ -22,6 +22,8 @@ export default function CompleteProfile() {
 
   const [countries, setCountries] = useState([]);
   const [states, setStates] = useState([]);
+  const [skillInput, setSkillInput] = useState("");
+
   useEffect(() => {
     setCountries(Country.getAllCountries());
   }, []);
@@ -35,6 +37,23 @@ export default function CompleteProfile() {
   const handleInputChange = (e) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
+  };
+
+  const handleAddSkill = () => {
+    if (skillInput.trim() && !formData.skills.includes(skillInput.trim())) {
+      setFormData((prevState) => ({
+        ...prevState,
+        skills: [...prevState.skills, skillInput.trim()],
+      }));
+      setSkillInput(""); // Clear input field after adding
+    }
+  };
+
+  const handleRemoveSkill = (index) => {
+    setFormData((prevState) => ({
+      ...prevState,
+      skills: prevState.skills.filter((_, i) => i !== index),
+    }));
   };
 
   const domains = ["web", "app", "blockchain", "other"];
@@ -203,6 +222,45 @@ export default function CompleteProfile() {
               </option>
             ))}
           </select>
+        </div>
+        <div>
+          <label className="block mb-2">Skills</label>
+          <div className="flex items-center space-x-2">
+            <input
+              type="text"
+              name="skillInput"
+              id="skillInput"
+              className="w-full p-2 border rounded"
+              value={skillInput}
+              onChange={(e) => setSkillInput(e.target.value)}
+            />
+            <button
+              type="button"
+              className="px-3 py-2 bg-indigo-600 text-white rounded"
+              onClick={handleAddSkill}
+            >
+              Add
+            </button>
+          </div>
+          {formData.skills.length > 0 && (
+            <ul className="mt-4 space-y-2">
+              {formData.skills.map((skill, index) => (
+                <li
+                  key={index}
+                  className="flex justify-between items-center font-semibold text-[#E04E3A] bg-gray-100 p-2 rounded"
+                >
+                  <span>{skill}</span>
+                  <button
+                    type="button"
+                    className="text-yellow-600 hover:underline"
+                    onClick={() => handleRemoveSkill(index)}
+                  >
+                    Remove
+                  </button>
+                </li>
+              ))}
+            </ul>
+          )}
         </div>
 
         {/* Add other form fields similarly */}
