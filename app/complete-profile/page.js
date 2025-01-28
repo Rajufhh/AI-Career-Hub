@@ -1,15 +1,12 @@
 "use client";
 import { Country, State } from "country-state-city";
-// import { useSession } from "next-auth/react";
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 
 export default function CompleteProfile() {
-  //   const { data: session } = useSession();
   const router = useRouter();
   const [formData, setFormData] = useState({
     username: "",
-    // username: session?.user?.name || "",
     country: "",
     state: "",
     domain: "",
@@ -23,6 +20,32 @@ export default function CompleteProfile() {
   const [countries, setCountries] = useState([]);
   const [states, setStates] = useState([]);
   const [skillInput, setSkillInput] = useState("");
+
+  useEffect(() => {
+    // Check if content exceeds the viewport height
+    const handleResize = () => {
+      if (document.body.scrollHeight > window.innerHeight) {
+        document.body.style.overflow = "auto";
+        document.documentElement.style.overflow = "auto";
+      } else {
+        document.body.style.overflow = "hidden";
+        document.documentElement.style.overflow = "hidden";
+      }
+    };
+
+    // Initial check
+    handleResize();
+
+    // Add resize event listener to handle dynamic changes in content size
+    window.addEventListener("resize", handleResize);
+
+    // Cleanup: Reset overflow when component is unmounted
+    return () => {
+      window.removeEventListener("resize", handleResize);
+      document.body.style.overflow = "auto";
+      document.documentElement.style.overflow = "auto";
+    };
+  }, []);
 
   useEffect(() => {
     setCountries(Country.getAllCountries());
@@ -45,7 +68,7 @@ export default function CompleteProfile() {
         ...prevState,
         skills: [...prevState.skills, skillInput.trim()],
       }));
-      setSkillInput(""); // Clear input field after adding
+      setSkillInput("");
     }
   };
 
@@ -54,6 +77,19 @@ export default function CompleteProfile() {
       ...prevState,
       skills: prevState.skills.filter((_, i) => i !== index),
     }));
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    console.log(JSON.stringify(formData));
+    // Simulate redirection after completion
+    // router.push("/dashboard");
+  };
+
+  const handleKeyDown = (e) => {
+    if (e.key === "Enter") {
+      e.preventDefault(); // Prevent form submission on ENTER key press
+    }
   };
 
   const domains = ["web", "app", "blockchain", "other"];
@@ -68,210 +104,143 @@ export default function CompleteProfile() {
     "Two or More Races",
   ];
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-
-    try {
-      //   const response = await fetch("/api/user/complete-profile", {
-      //     method: "POST",
-      //     headers: {
-      //       "Content-Type": "application/json",
-      //     },
-      //     body: JSON.stringify(formData),
-      //   });
-      console.log(JSON.stringify(formData));
-
-      //   const data = await response.json();
-
-      //   if (data.success) {
-      //     router.push("/dashboard"); // Redirect to dashboard after completion
-      //   }
-    } catch (error) {
-      console.error("Error completing profile:", error);
-    }
-  };
-
   return (
-    <div className="max-w-2xl mx-auto p-4">
-      <h1 className="text-2xl font-bold mb-4">Complete Your Profile</h1>
-      <form onSubmit={handleSubmit} className="space-y-4">
-        {/* Form fields */}
-        <div>
-          <label className="block mb-2">Username</label>
-          <input
-            type="text"
-            value={formData.username}
-            onChange={(e) =>
-              setFormData({ ...formData, username: e.target.value })
-            }
-            className="w-full p-2 border font-semibold text-[#E04E3A] rounded"
-            required
-          />
-        </div>
-        <div>
-          <label className="block mb-2">Country</label>
-          <select
-            name="country"
-            id="country"
-            required
-            className="w-full p-2 border rounded font-semibold text-[#E04E3A]"
-            value={formData.country}
-            onChange={handleInputChange}
-          >
-            <option value=""></option>
-            {countries.map((country) => (
-              <option key={country.isoCode} value={country.isoCode}>
-                {country.name}
-              </option>
-            ))}
-          </select>
-        </div>
+    <div className="min-h-screen bg-[#0D1117] flex flex-col">
+      <main className="flex-grow container mx-auto px-4 py-16">
+        <div className="max-w-2xl mx-auto">
+          <p className="text-xl text-gray-300 mb-8">
+            Fill out your details to get personalized career guidance and unlock your potential!
+          </p>
+          <form onSubmit={handleSubmit} className="space-y-6" onKeyDown={handleKeyDown}>
+            <div>
+              <label className="block text-gray-400 mb-2">Username</label>
+              <input
+                type="text"
+                name="username"
+                value={formData.username}
+                onChange={handleInputChange}
+                className="w-full px-4 py-2 border border-gray-700 rounded-lg bg-[#161B22] text-white"
+                required
+              />
+            </div>
 
-        {formData.country && (
-          <div>
-            <label className="block mb-2">State</label>
-            <select
-              name="state"
-              id="state"
-              required
-              className="w-full p-2 border rounded font-semibold text-[#E04E3A]"
-              value={formData.state}
-              onChange={handleInputChange}
-            >
-              <option value=""></option>
-              {states.map((state) => (
-                <option key={state.isoCode} value={state.isoCode}>
-                  {state.name}
-                </option>
-              ))}
-            </select>
-          </div>
-        )}
+            <div>
+              <label className="block text-gray-400 mb-2">Country</label>
+              <select
+                name="country"
+                value={formData.country}
+                onChange={handleInputChange}
+                className="w-full px-4 py-2 border border-gray-700 rounded-lg bg-[#161B22] text-white"
+                required
+              >
+                <option value="">Select your country</option>
+                {countries.map((country) => (
+                  <option key={country.isoCode} value={country.isoCode}>
+                    {country.name}
+                  </option>
+                ))}
+              </select>
+            </div>
 
-        <div>
-          <label className="block mb-2">Domain</label>
-          <select
-            name="domain"
-            id="domain"
-            required
-            className="w-full p-2 border rounded font-semibold text-[#E04E3A]"
-            value={formData.domain}
-            onChange={handleInputChange}
-          >
-            <option value=""></option>
-            {domains.map((domain) => (
-              <option key={domain} value={domain}>
-                {domain.charAt(0).toUpperCase() + domain.slice(1)}
-              </option>
-            ))}
-          </select>
-        </div>
-
-        {formData.domain === "other" && (
-          <div>
-            <label className="block mb-2">Specify Domain</label>
-            <input
-              type="text"
-              name="otherDomain"
-              id="otherDomain"
-              required
-              className="w-full p-2 border rounded font-semibold text-[#E04E3A]"
-              value={formData.otherDomain}
-              onChange={handleInputChange}
-            />
-          </div>
-        )}
-        <div>
-          <label className="block mb-2">Gender</label>
-          <div className="mt-2 space-y-2">
-            {genders.map((gender) => (
-              <div key={gender} className="flex items-center">
-                <input
-                  type="radio"
-                  name="gender"
-                  value={gender}
-                  id={`gender-${gender}`}
-                  checked={formData.gender === gender}
+            {formData.country && (
+              <div>
+                <label className="block text-gray-400 mb-2">State</label>
+                <select
+                  name="state"
+                  value={formData.state}
                   onChange={handleInputChange}
-                  className="focus:bg-red-500 h-4 w-4 text-[#E04E3A] border-gray-300"
-                />
-                <label
-                  htmlFor={`gender-${gender}`}
-                  className="ml-3 block text-sm font-medium text-gray-700"
+                  className="w-full px-4 py-2 border border-gray-700 rounded-lg bg-[#161B22] text-white"
+                  required
                 >
-                  {gender.charAt(0).toUpperCase() + gender.slice(1)}
-                </label>
+                  <option value="">Select your state</option>
+                  {states.map((state) => (
+                    <option key={state.isoCode} value={state.isoCode}>
+                      {state.name}
+                    </option>
+                  ))}
+                </select>
               </div>
-            ))}
-          </div>
-        </div>
-        <div>
-          <label className="block mb-2">Race</label>
-          <select
-            name="race"
-            id="race"
-            required
-            className="w-full p-2 border rounded font-semibold text-[#E04E3A]"
-            value={formData.race}
-            onChange={handleInputChange}
-          >
-            <option value=""></option>
-            {races.map((race) => (
-              <option key={race} value={race}>
-                {race}
-              </option>
-            ))}
-          </select>
-        </div>
-        <div>
-          <label className="block mb-2">Skills</label>
-          <div className="flex items-center space-x-2">
-            <input
-              type="text"
-              name="skillInput"
-              id="skillInput"
-              className="w-full p-2 border rounded"
-              value={skillInput}
-              onChange={(e) => setSkillInput(e.target.value)}
-            />
-            <button
-              type="button"
-              className="px-3 py-2 bg-indigo-600 text-white rounded"
-              onClick={handleAddSkill}
-            >
-              Add
-            </button>
-          </div>
-          {formData.skills.length > 0 && (
-            <ul className="mt-4 space-y-2">
-              {formData.skills.map((skill, index) => (
-                <li
-                  key={index}
-                  className="flex justify-between items-center font-semibold text-[#E04E3A] bg-gray-100 p-2 rounded"
+            )}
+
+            <div>
+              <label className="block text-gray-400 mb-2">Domain</label>
+              <select
+                name="domain"
+                value={formData.domain}
+                onChange={handleInputChange}
+                className="w-full px-4 py-2 border border-gray-700 rounded-lg bg-[#161B22] text-white"
+                required
+              >
+                <option value="">Select your domain</option>
+                {domains.map((domain) => (
+                  <option key={domain} value={domain}>
+                    {domain.charAt(0).toUpperCase() + domain.slice(1)}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            {formData.domain === "other" && (
+              <div>
+                <label className="block text-gray-400 mb-2">Specify Domain</label>
+                <input
+                  type="text"
+                  name="otherDomain"
+                  value={formData.otherDomain}
+                  onChange={handleInputChange}
+                  className="w-full px-4 py-2 border border-gray-700 rounded-lg bg-[#161B22] text-white"
+                  required
+                />
+              </div>
+            )}
+
+            <div>
+              <label className="block text-gray-400 mb-2">Skills</label>
+              <div className="flex items-center space-x-2">
+                <input
+                  type="text"
+                  value={skillInput}
+                  onChange={(e) => setSkillInput(e.target.value)}
+                  className="flex-grow px-4 py-2 border border-gray-700 rounded-lg bg-[#161B22] text-white"
+                />
+                <button
+                  type="button"
+                  onClick={handleAddSkill}
+                  className="px-4 py-2 bg-gradient-to-r from-[#E31D65] to-[#FF6B2B] text-white rounded-lg hover:opacity-90"
                 >
-                  <span>{skill}</span>
-                  <button
-                    type="button"
-                    className="text-yellow-600 hover:underline"
-                    onClick={() => handleRemoveSkill(index)}
-                  >
-                    Remove
-                  </button>
-                </li>
-              ))}
-            </ul>
-          )}
+                  Add
+                </button>
+              </div>
+              {formData.skills.length > 0 && (
+                <ul className="mt-4 space-y-2">
+                  {formData.skills.map((skill, index) => (
+                    <li
+                      key={index}
+                      className="flex justify-between items-center px-4 py-2 bg-[#161B22] text-white rounded-lg"
+                    >
+                      <span>{skill}</span>
+                      <button
+                        type="button"
+                        onClick={() => handleRemoveSkill(index)}
+                        className="text-red-400 hover:underline"
+                      >
+                        Remove
+                      </button>
+                    </li>
+                  ))}
+                </ul>
+              )}
+            </div>
+
+            <button
+              type="submit"
+              className="w-full px-4 py-2 bg-gradient-to-r from-[#E31D65] to-[#FF6B2B] text-white rounded-lg hover:opacity-90 transition-opacity duration-200"
+            >
+              Complete Profile
+            </button>
+          </form>
         </div>
-
-        {/* Add other form fields similarly */}
-
-        <button
-          type="submit"
-          className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600"
-        >
-          Complete Profile
-        </button>
-      </form>
+      </main>
     </div>
   );
 }
