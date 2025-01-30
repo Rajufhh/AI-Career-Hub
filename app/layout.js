@@ -1,9 +1,9 @@
 import "./globals.css";
 import { Geist, Geist_Mono } from "next/font/google";
-// import { AuthProvider } from "@/providers";
+import { AuthProvider } from "@/providers";
 import { Navbar } from "@/components/Navbar";
+import AnimatedWrapper from "@/components/AnimatedWrapper"; // Import the client component
 
-// Define Geist fonts
 const geistSans = Geist({
   variable: "--font-geist-sans",
   subsets: ["latin"],
@@ -14,7 +14,6 @@ const geistMono = Geist_Mono({
   subsets: ["latin"],
 });
 
-// Metadata for the application
 export const metadata = {
   title: "AI-Powered Skill Assessment Platform",
   description: "Assess your skills and get AI-powered career guidance",
@@ -23,13 +22,11 @@ export const metadata = {
 export default function RootLayout({ children }) {
   return (
     <html lang="en">
-      <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
-      >
-        {/* <AuthProvider> */}
+      <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
+        <AuthProvider>
           <Navbar />
-          {children}
-        {/* </AuthProvider> */}
+          <AnimatedWrapper>{children}</AnimatedWrapper> {/* Wrap the app with animation */}
+        </AuthProvider>
       </body>
     </html>
   );

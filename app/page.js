@@ -63,8 +63,8 @@ export default function Home() {
             </div>
           </div>
 
-          {/* Scroll Indicator */}
-          <div className="absolute bottom-16 left-1/2 transform -translate-x-1/2 animate-bounce">
+          {/* {/* Scroll Indicator */}
+          {/* <div className="absolute bottom-16 left-1/2 transform -translate-x-1/2 animate-bounce">
             <svg
               xmlns="http://www.w3.org/2000/svg"
               className="h-8 w-8 text-white opacity-60"
@@ -79,17 +79,19 @@ export default function Home() {
                 d="M19 14l-7 7m0 0l-7-7m7 7V3"
               />
             </svg>
-          </div>
+          </div> */}
+
         </div>
       </main>
 
       {/* Features Section with Scroll Reveal */}
       <section
-        className={`bg-[#161B22] py-32 transition-all duration-1000 transform ${
-          showFeatures
-            ? "translate-y-0 opacity-100"
-            : "translate-y-10 opacity-0"
-        }`}
+        // className={`bg-[#161B22] py-32 transition-all duration-1000 transform ${
+        //   showFeatures
+        //     ? "translate-y-0 opacity-100"
+        //     : "translate-y-10 opacity-0"
+        // }`}
+        className={`bg-[#161B22] py-32`}
       >
         <div className="container mx-auto px-8 ">
           <h2 className="text-4xl font-bold mb-12 text-center bg-gradient-to-r pb-6 from-[#E31D65] to-[#FF6B2B] text-transparent bg-clip-text">
