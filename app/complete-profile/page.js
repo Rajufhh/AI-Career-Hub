@@ -7,12 +7,12 @@ export default function CompleteProfile() {
   const router = useRouter();
   const [formData, setFormData] = useState({
     username: "",
+    gender: "",
     country: "",
     state: "",
     domain: "",
     guidedCareerPath: "",
     guidedCareerDetails: "",
-    gender: "",
     race: "",
     skills: [],
   });
@@ -22,7 +22,6 @@ export default function CompleteProfile() {
   const [skillInput, setSkillInput] = useState("");
 
   useEffect(() => {
-    // Check if content exceeds the viewport height
     const handleResize = () => {
       if (document.body.scrollHeight > window.innerHeight) {
         document.body.style.overflow = "auto";
@@ -33,13 +32,9 @@ export default function CompleteProfile() {
       }
     };
 
-    // Initial check
     handleResize();
-
-    // Add resize event listener to handle dynamic changes in content size
     window.addEventListener("resize", handleResize);
 
-    // Cleanup: Reset overflow when component is unmounted
     return () => {
       window.removeEventListener("resize", handleResize);
       document.body.style.overflow = "auto";
@@ -88,7 +83,7 @@ export default function CompleteProfile() {
 
   const handleKeyDown = (e) => {
     if (e.key === "Enter") {
-      e.preventDefault(); // Prevent form submission on ENTER key press
+      e.preventDefault();
     }
   };
 
@@ -105,6 +100,7 @@ export default function CompleteProfile() {
   ];
 
   return (
+    <ProtectedRoute>
     <div className="min-h-screen bg-[#0D1117] flex flex-col">
       <main className="flex-grow container mx-auto px-4 py-16">
         <div className="max-w-2xl mx-auto">
@@ -125,6 +121,26 @@ export default function CompleteProfile() {
             </div>
 
             <div>
+              <label className="block text-gray-400 mb-2">Gender</label>
+              <select
+                name="gender"
+                value={formData.gender}
+                onChange={handleInputChange}
+                className="w-full px-4 py-2 border border-gray-700 rounded-lg bg-[#161B22] text-white"
+                required
+              >
+                <option value="" disabled hidden>
+                  Select your gender
+                </option>
+                {genders.map((gender) => (
+                  <option key={gender} value={gender}>
+                    {gender.charAt(0).toUpperCase() + gender.slice(1)}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            <div>
               <label className="block text-gray-400 mb-2">Country</label>
               <select
                 name="country"
@@ -133,7 +149,9 @@ export default function CompleteProfile() {
                 className="w-full px-4 py-2 border border-gray-700 rounded-lg bg-[#161B22] text-white"
                 required
               >
-                <option value="">Select your country</option>
+                <option value="" disabled hidden>
+                  Select your country
+                </option>
                 {countries.map((country) => (
                   <option key={country.isoCode} value={country.isoCode}>
                     {country.name}
@@ -152,7 +170,9 @@ export default function CompleteProfile() {
                   className="w-full px-4 py-2 border border-gray-700 rounded-lg bg-[#161B22] text-white"
                   required
                 >
-                  <option value="">Select your state</option>
+                  <option value="" disabled hidden>
+                    Select your state
+                  </option>
                   {states.map((state) => (
                     <option key={state.isoCode} value={state.isoCode}>
                       {state.name}
@@ -171,7 +191,9 @@ export default function CompleteProfile() {
                 className="w-full px-4 py-2 border border-gray-700 rounded-lg bg-[#161B22] text-white"
                 required
               >
-                <option value="">Select your domain</option>
+                <option value="" disabled hidden>
+                  Select your domain
+                </option>
                 {domains.map((domain) => (
                   <option key={domain} value={domain}>
                     {domain.charAt(0).toUpperCase() + domain.slice(1)}
@@ -242,5 +264,6 @@ export default function CompleteProfile() {
         </div>
       </main>
     </div>
+    </ProtectedRoute>
   );
 }

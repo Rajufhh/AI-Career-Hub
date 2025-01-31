@@ -66,7 +66,18 @@ const SkillTest = () => {
   };
 
   const handleBackToProfile = () => {
-    window.location.href = '/profile';
+    try {
+      // Save to localStorage before navigating
+      const testResults = JSON.parse(localStorage.getItem('testResults') || '{}');
+      testResults[skill] = score;
+      localStorage.setItem('testResults', JSON.stringify(testResults));
+      
+      // Navigate to profile
+      window.location.href = '/profile';
+    } catch (error) {
+      console.error('Error saving test results:', error);
+      window.location.href = '/profile';
+    }
   };
 
   if (loading) {
@@ -186,12 +197,10 @@ const SkillTest = () => {
           ></div>
         </div>
 
-        {/*  */}
         <h2
           className="text-xl text-white font-semibold mb-4"
           dangerouslySetInnerHTML={{ __html: md.render(questions[currentQuestion].question) }}
         />
-        {/*  */}
 
         <div className="space-y-4">
           {questions[currentQuestion].options.map((option, index) => (

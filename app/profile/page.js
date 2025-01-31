@@ -1,9 +1,10 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { useRouter } from 'next/navigation';
 import ProfileCard from "@/components/ProfileCard";
+import { ProtectedRoute } from '@/services/routeProtectionService';
 
-// Simulated data - replace with actual API call
 const mockProfile = {
   id: "1",
   username: "Aaryan Singh",
@@ -33,16 +34,61 @@ const mockProfile = {
 };
 
 export default function Home() {
-  const [profile] = useState(mockProfile);
+  const [profile, setProfile] = useState(mockProfile);
+  const router = useRouter();
+
+  useEffect(() => {
+    // Check for completed assessments
+    try {
+      const testResults = JSON.parse(localStorage.getItem('testResults') || '{}');
+      
+      if (Object.keys(testResults).length > 0) {
+        // Update profile with new scores
+        const updatedSkills = profile.skills.map(skill => {
+          if (testResults[skill.name] !== undefined) {
+            return {
+              ...skill,
+              assessmentTaken: true,
+              assessmentScore: Math.round(testResults[skill.name])
+            };
+          }
+          return skill;
+        });
+
+        setProfile(prev => ({
+          ...prev,
+          skills: updatedSkills
+        }));
+
+        // Clear the results after updating
+        localStorage.removeItem('testResults');
+      }
+    } catch (error) {
+      console.error('Error loading test results:', error);
+    }
+  }, []);
 
   const handleTakeAssessment = (skillId) => {
-    // Implement assessment logic here
-    console.log(`Taking assessment for skill ${skillId}`);
+    const skill = profile.skills.find(s => s.id === skillId);
+    if (skill) {
+      console.log('Navigating to assessment for:', skill.name);
+      try {
+        router.push(`/assessments?skill=${encodeURIComponent(skill.name)}`);
+      } catch (error) {
+        console.error('Router navigation failed:', error);
+        window.location.href = `/assessments?skill=${encodeURIComponent(skill.name)}`;
+      }
+    }
   };
 
   return (
+    <ProtectedRoute>
     <main className="min-h-screen bg-[#0D1117] py-8">
-      <ProfileCard profile={profile} onTakeAssessment={handleTakeAssessment} />
+      <ProfileCard 
+        profile={profile} 
+        onTakeAssessment={handleTakeAssessment} 
+      />
     </main>
+    </ProtectedRoute>
   );
 }
