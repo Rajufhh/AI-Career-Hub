@@ -29,7 +29,7 @@ export default function Home() {
         <div className="container mx-auto px-8 py-16">
           <div className="flex flex-col lg:flex-row items-center justify-between gap-12">
             <div className="lg:w-1/2">
-              <h1 className="text-4xl sm:text-5xl md:text-6xl font-bold mb-6 bg-gradient-to-r from-[#E31D65] to-[#FF6B2B] text-transparent bg-clip-text">
+              <h1 className="text-4xl  sm:text-5xl md:text-6xl font-bold mb-6 bg-gradient-to-r from-[#E31D65] to-[#FF6B2B] text-transparent bg-clip-text">
                 Unlock Your Potential with AI-Powered Assessments
               </h1>
               <p className="text-xl text-gray-300 mb-8">
@@ -56,7 +56,7 @@ export default function Home() {
               </Link>
             </div>
             <div className="lg:w-1/2">
-              <div className="w-full  h-full shadow-lg flex items-center justify-center">
+              <div className="w-full mb-6 h-80 shadow-lg flex items-center justify-center">
                 {/* <span className="text-4xl bg-gradient-to-r from-[#E31D65] to-[#FF6B2B] text-transparent bg-clip-text">
                   3D Graphic Placeholder
                 </span> */}
@@ -174,7 +174,7 @@ export default function Home() {
             </div>
           </div>
           <div className="mt-8 text-center text-gray-500">
-            © 2024 AI Career Hub. All rights reserved.
+            © 2025 AI Career Hub. All rights reserved.
           </div>
         </div>
       </section>
