@@ -1,5 +1,5 @@
-import Link from "next/link"
-import { Search } from "lucide-react"
+import Link from "next/link";
+import { Search } from "lucide-react";
 
 export function Navbar() {
   return (
@@ -35,19 +35,18 @@ export function Navbar() {
             </div>
           </div>
           <div className="flex items-center">
-          <a href="/complete-profile">
-            <button className="text-gray-300 hover:text-white p-1 rounded-full hover:bg-dark transition-colors duration-200">
-              <img
-                src="https://www.gravatar.com/avatar/00000000000000000000000000000000?d=mp&f=y" // Replace this with the profile picture URL
-                alt="Profile"
-                className="h-8 w-8 rounded-full object-cover"
-              />
-            </button>
-          </a>
+            <a href="/complete-profile">
+              <button className="text-gray-300 hover:text-white p-1 rounded-full hover:bg-dark transition-colors duration-200">
+                <img
+                  src="https://www.gravatar.com/avatar/00000000000000000000000000000000?d=mp&f=y" // Replace this with the profile picture URL
+                  alt="Profile"
+                  className="h-8 w-8 rounded-full object-cover"
+                />
+              </button>
+            </a>
           </div>
         </div>
       </div>
     </nav>
-  )
+  );
 }
-
