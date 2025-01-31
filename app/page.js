@@ -3,7 +3,8 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { Brain } from "lucide-react";
-
+import Lottie from "lottie-react";
+import Graphic from "@/assets/Graphic.json";
 export default function Home() {
   const [showFeatures, setShowFeatures] = useState(false);
 
@@ -55,10 +56,11 @@ export default function Home() {
               </Link>
             </div>
             <div className="lg:w-1/2">
-              <div className="w-full h-96 bg-[#161B22] rounded-lg shadow-lg flex items-center justify-center">
-                <span className="text-4xl bg-gradient-to-r from-[#E31D65] to-[#FF6B2B] text-transparent bg-clip-text">
+              <div className="w-full  h-full shadow-lg flex items-center justify-center">
+                {/* <span className="text-4xl bg-gradient-to-r from-[#E31D65] to-[#FF6B2B] text-transparent bg-clip-text">
                   3D Graphic Placeholder
-                </span>
+                </span> */}
+                <Lottie animationData={Graphic} />
               </div>
             </div>
           </div>
@@ -80,7 +82,6 @@ export default function Home() {
               />
             </svg>
           </div> */}
-
         </div>
       </main>
 

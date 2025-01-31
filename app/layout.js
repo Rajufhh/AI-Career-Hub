@@ -22,12 +22,18 @@ export const metadata = {
 export default function RootLayout({ children }) {
   return (
     <html lang="en">
-      <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
+      <body
+        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
+      >
         <AuthProvider>
           <Navbar />
-          <AnimatedWrapper>{children}</AnimatedWrapper> {/* Wrap the app with animation */}
+          <AnimatedWrapper>{children}</AnimatedWrapper>
         </AuthProvider>
       </body>
+
+      {/* Load external scripts properly using Next.js <Script> */}
+      {/* <script src="https://cdn.botpress.cloud/webchat/v2.2/inject.js" />
+      <script src="https://files.bpcontent.cloud/2025/01/27/19/20250127193107-0FV93D6I.js" /> */}
     </html>
   );
 }
