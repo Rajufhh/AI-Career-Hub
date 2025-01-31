@@ -1,10 +1,22 @@
 "use client";
 
+import { useRouter } from 'next/navigation';
 import { Button } from "./ui/button";
 import { Badge } from "./ui/badge";
 import { MapPin, Briefcase, Award, ChevronRight } from "lucide-react";
 
-export default function ProfileCard({ profile, onTakeAssessment }) {
+export default function ProfileCard({ profile }) {
+  const router = useRouter();
+
+  const handleTakeAssessment = (skillId) => {
+    // Find the skill name from the ID
+    const skill = profile.skills.find(s => s.id === skillId);
+    if (skill) {
+      console.log('Navigating to assessment for:', skill.name); // Debug log
+      router.push(`/assessments?skill=${encodeURIComponent(skill.name)}`);
+    }
+  };
+
   return (
     <div className="w-full max-w-4xl mx-auto p-4">
       <div className="p-6 bg-[#161B22] rounded-2xl">
@@ -12,7 +24,7 @@ export default function ProfileCard({ profile, onTakeAssessment }) {
         <div className="flex flex-col md:flex-row items-center gap-6">
           <div className="relative w-32 h-32">
             <img
-              src="https://www.gravatar.com/avatar/00000000000000000000000000000000?d=mp&f=y" // Replace this with the profile picture URL
+              src="https://www.gravatar.com/avatar/00000000000000000000000000000000?d=mp&f=y"
               alt="Profile"
               className="h-full w-full rounded-full object-cover"
             />
@@ -59,8 +71,8 @@ export default function ProfileCard({ profile, onTakeAssessment }) {
                   <Button
                     variant="outline"
                     size="sm"
-                    onClick={() => onTakeAssessment(skill.id)}
-                    className="bg-[#21262D] hover:bg-[#30363D] text-gray-300"
+                    onClick={() => handleTakeAssessment(skill.id)}
+                    className="bg-[#21262D] hover:bg-[#30363D] text-gray-300 transition-colors duration-200"
                   >
                     Take Assessment
                   </Button>

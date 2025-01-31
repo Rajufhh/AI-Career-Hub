@@ -56,7 +56,7 @@ export default function Home() {
               </Link>
             </div>
             <div className="lg:w-1/2">
-              <div className="w-full mb-6 h-80 shadow-lg flex items-center justify-center">
+              <div className="w-full mb-6 h-80 flex items-center justify-center">
                 {/* <span className="text-4xl bg-gradient-to-r from-[#E31D65] to-[#FF6B2B] text-transparent bg-clip-text">
                   3D Graphic Placeholder
                 </span> */}
