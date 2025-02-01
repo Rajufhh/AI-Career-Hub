@@ -3,25 +3,85 @@ import { Country, State } from "country-state-city";
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { ProtectedRoute } from "@/services/routeProtectionService";
+import { useSession } from "next-auth/react";
 
 export default function CompleteProfile() {
+  const { data: session, status } = useSession();
   const router = useRouter();
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState('');
+  const [countries, setCountries] = useState([]);
+  const [states, setStates] = useState([]);
+  const [skillInput, setSkillInput] = useState("");
+
   const [formData, setFormData] = useState({
     username: "",
     gender: "",
     country: "",
     state: "",
     domain: "",
-    guidedCareerPath: "",
-    guidedCareerDetails: "",
+    otherDomain: "",
     race: "",
     skills: [],
+    mailId: "",
   });
 
-  const [countries, setCountries] = useState([]);
-  const [states, setStates] = useState([]);
-  const [skillInput, setSkillInput] = useState("");
+  // Authentication check effect
+  useEffect(() => {
+    if (status === "unauthenticated") {
+      router.push("/");
+    }
+  }, [status, router]);
 
+  // Fetch existing user data
+  useEffect(() => {
+    async function fetchUserData() {
+      if (session?.user?.email) {
+        try {
+          const response = await fetch(`/api/get-user?email=${encodeURIComponent(session.user.email)}`);
+          const data = await response.json();
+
+          if (response.ok && data) {
+            setFormData({
+              username: data.username || "",
+              gender: data.gender || "",
+              country: data.country || "",
+              state: data.state || "",
+              domain: data.domain || "",
+              otherDomain: data.otherDomain || "",
+              race: data.race || "",
+              skills: data.skills || [],
+              mailId: data.mailId || session.user.email,
+            });
+
+            // If user data exists, redirect to profile page
+            if (data.username) {
+              router.push('/profile');
+              return;
+            }
+          }
+        } catch (error) {
+          console.error('Error fetching user data:', error);
+          // Don't set error here as the user might be new
+        }
+      }
+      setIsLoading(false);
+    }
+
+    fetchUserData();
+  }, [session, router]);
+
+  // Effect for email update from session
+  useEffect(() => {
+    if (session?.user?.email) {
+      setFormData(prev => ({
+        ...prev,
+        mailId: session.user.email
+      }));
+    }
+  }, [session]);
+
+  // Scroll handling effect
   useEffect(() => {
     const handleResize = () => {
       if (document.body.scrollHeight > window.innerHeight) {
@@ -43,15 +103,29 @@ export default function CompleteProfile() {
     };
   }, []);
 
+  // Countries effect
   useEffect(() => {
     setCountries(Country.getAllCountries());
   }, []);
 
+  // States effect
   useEffect(() => {
     if (formData.country) {
       setStates(State.getStatesOfCountry(formData.country));
     }
   }, [formData.country]);
+
+  if (status === "loading" || isLoading) {
+    return (
+      <div className="min-h-screen bg-[#0D1117] flex items-center justify-center">
+        {/* <div className="text-white">Loading...</div> */}
+      </div>
+    );
+  }
+
+  if (status === "unauthenticated") {
+    return null;
+  }
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -77,9 +151,38 @@ export default function CompleteProfile() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    console.log(JSON.stringify(formData));
-    // Simulate redirection after completion
-    // router.push("/dashboard");
+    setIsLoading(true);
+    setError('');
+
+    if (!formData.mailId) {
+      setError('No email address found. Please sign in again.');
+      setIsLoading(false);
+      return;
+    }
+
+    try {
+      const response = await fetch('/api/create-user', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(formData),
+      });
+  
+      const data = await response.json();
+  
+      if (!response.ok) {
+        throw new Error(data.error || 'Error creating user');
+      }
+  
+      alert('Profile completed successfully!');
+      router.push('/profile');
+    } catch (error) {
+      console.error('Error:', error);
+      setError(error.message);
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   const handleKeyDown = (e) => {
@@ -88,8 +191,8 @@ export default function CompleteProfile() {
     }
   };
 
-  const domains = ["web", "app", "blockchain", "other"];
-  const genders = ["male", "female", "other"];
+  const domains = ["web", "app", "blockchain"];
+  const genders = ["male", "female", "other", "prefer not to say"];
   const races = [
     "American Indian or Alaska Native",
     "Asian",
@@ -114,6 +217,17 @@ export default function CompleteProfile() {
               className="space-y-6"
               onKeyDown={handleKeyDown}
             >
+              {/* Email display field */}
+              <div>
+                <label className="block text-gray-400 mb-2">Email</label>
+                <input
+                  type="email"
+                  value={formData.mailId}
+                  disabled
+                  className="w-full px-4 py-2 border border-gray-700 rounded-lg bg-[#161B22] text-white opacity-70"
+                />
+              </div>
+
               <div>
                 <label className="block text-gray-400 mb-2">Username</label>
                 <input
@@ -225,6 +339,26 @@ export default function CompleteProfile() {
               )}
 
               <div>
+                <label className="block text-gray-400 mb-2">Race</label>
+                <select
+                  name="race"
+                  value={formData.race}
+                  onChange={handleInputChange}
+                  className="w-full px-4 py-2 border border-gray-700 rounded-lg bg-[#161B22] text-white"
+                  required
+                >
+                  <option value="" disabled hidden>
+                    Select your race
+                  </option>
+                  {races.map((race) => (
+                    <option key={race} value={race}>
+                      {race}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              <div>
                 <label className="block text-gray-400 mb-2">Skills</label>
                 <div className="flex items-center space-x-2">
                   <input
@@ -262,11 +396,18 @@ export default function CompleteProfile() {
                 )}
               </div>
 
+              {error && (
+                <div className="text-red-500 text-sm mt-2">
+                  {error}
+                </div>
+              )}
+
               <button
                 type="submit"
-                className="w-full px-4 py-2 bg-gradient-to-r from-[#E31D65] to-[#FF6B2B] text-white rounded-lg hover:opacity-90 transition-opacity duration-200"
+                disabled={isLoading}
+                className="w-full px-4 py-2 bg-gradient-to-r from-[#E31D65] to-[#FF6B2B] text-white rounded-lg hover:opacity-90 transition-opacity duration-200 disabled:opacity-50"
               >
-                Complete Profile
+                {isLoading ? 'Creating Profile...' : 'Complete Profile'}
               </button>
             </form>
           </div>

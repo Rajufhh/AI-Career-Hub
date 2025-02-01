@@ -94,7 +94,7 @@ export async function POST(request) {
       - **Good points:** (in a single line)
       - **Missing points:** (in a single line)
       - **Possible additional points:** (in a single line)
-      Be concise and to the point.`, // Added markdown formatting to system instruction
+      Be thoughtful and give feedbacks.`, // Added markdown formatting to system instruction
     });
 
     const chatSession = model.startChat({

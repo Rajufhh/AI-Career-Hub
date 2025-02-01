@@ -36,7 +36,7 @@ export default function Home() {
                 Discover your strengths, improve your skills, and get
                 personalized career guidance with our cutting-edge platform.
               </p>
-              <Link
+              {/* <Link
                 href="/auth/signin"
                 className="inline-flex items-center px-6 py-3 border border-transparent text-base font-medium rounded-md text-white bg-gradient-to-r from-[#E31D65] to-[#FF6B2B] hover:opacity-90 transition-opacity duration-200"
               >
@@ -53,7 +53,7 @@ export default function Home() {
                     clipRule="evenodd"
                   />
                 </svg>
-              </Link>
+              </Link> */}
             </div>
             <div className="lg:w-1/2">
               <div className="w-full mb-6 h-80 flex items-center justify-center">

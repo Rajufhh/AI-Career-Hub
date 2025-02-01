@@ -49,7 +49,7 @@ export default function Home() {
             Job Application Analyzer
           </h1>
           <p className="text-gray-400 mb-8">
-            Enter a job description and upload your resume to get an
+            Enter a job description and upload your resume as a PDF to get an
             AI-generated score and feedback.
           </p>
 

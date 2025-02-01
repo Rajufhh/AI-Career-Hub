@@ -4,6 +4,10 @@ import { useRouter } from 'next/navigation';
 import { Button } from "./ui/button";
 import { Badge } from "./ui/badge";
 import { MapPin, Briefcase, Award, ChevronRight } from "lucide-react";
+// import { useSession } from "next-auth/react";
+// import { getSessionData } from "@/utils/sessionUtils";
+
+// const { name, email, image, isAuthenticated } = getSessionData(session);
 
 export default function ProfileCard({ profile }) {
   const router = useRouter();
@@ -15,6 +19,7 @@ export default function ProfileCard({ profile }) {
       console.log('Navigating to assessment for:', skill.name); // Debug log
       router.push(`/assessments?skill=${encodeURIComponent(skill.name)}`);
     }
+
   };
 
   return (
