@@ -1,5 +1,5 @@
 "use client";
-import React, { useState, useRef, useEffect } from "react";
+import React, { useState, useRef, useEffect, Suspense } from "react";
 import { useSearchParams } from "next/navigation";
 import QuestionService from "@/services/questionService";
 import MarkdownIt from "markdown-it";
@@ -522,4 +522,10 @@ const ProctoredSkillTest = () => {
   );
 };
 
-export default ProctoredSkillTest;
+const AssessmentsPage = () => (
+  <Suspense fallback={<div>Loading...</div>}>
+    <ProctoredSkillTest />
+  </Suspense>
+);
+
+export default AssessmentsPage;
