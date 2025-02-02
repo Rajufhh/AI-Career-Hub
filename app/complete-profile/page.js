@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { ProtectedRoute } from "@/services/routeProtectionService";
 import { useSession } from "next-auth/react";
+import ChatbotController from '@/components/ChatbotController';
 
 export default function CompleteProfile() {
   const { data: session, status } = useSession();
@@ -412,6 +413,7 @@ export default function CompleteProfile() {
             </form>
           </div>
         </main>
+        <ChatbotController />
       </div>
     </ProtectedRoute>
   );

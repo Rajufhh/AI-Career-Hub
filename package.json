@@ -10,6 +10,7 @@
   },
   "dependencies": {
     "@google/generative-ai": "^0.21.0",
+    "@radix-ui/react-progress": "^1.1.1",
     "axios": "^1.7.9",
     "axios-retry": "^4.5.0",
     "base64-js": "^1.5.1",
@@ -27,6 +28,8 @@
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
     "react-hot-toast": "^2.5.1",
+    "react-markdown": "^9.0.3",
+    "remark-gfm": "^4.0.0",
     "shadcn-ui": "^0.9.4"
   },
   "devDependencies": {

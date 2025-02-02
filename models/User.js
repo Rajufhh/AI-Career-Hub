@@ -5,6 +5,11 @@ const { Schema } = mongoose;
 // Zod Schemas
 const SkillSchema = z.string().min(1).trim();
 
+const SkillScoreSchema = z.object({
+  skill: z.string().min(1).trim(),
+  score: z.number().min(0).max(100),
+});
+
 const UserSchema = z.object({
   username: z.string().min(3).trim(),
   gender: z.enum(['male', 'female', 'other', 'prefer not to say']),
@@ -19,99 +24,125 @@ const UserSchema = z.object({
     'Hispanic or Latino',
     'Native Hawaiian or Other Pacific Islander',
     'White',
-    'Two or More Races'
+    'Two or More Races',
   ]),
   skills: z.array(SkillSchema),
+  skillScores: z.array(SkillScoreSchema).optional(),
+  careerGuidance: z.string().max(50000).optional(), // New field for career guidance
   mailId: z.string().email().trim().toLowerCase(),
 });
 
 // Mongoose Schema
-const mongooseUserSchema = new Schema({
-  username: {
-    type: String,
-    required: [true, 'Username is required'],
-    trim: true,
-    minLength: [3, 'Username must be at least 3 characters long'],
-    unique: true,
-    index: true
-  },
-  gender: {
-    type: String,
-    required: [true, 'Gender is required'],
-    enum: {
-      values: ['male', 'female', 'other', 'prefer not to say'],
-      message: '{VALUE} is not a valid gender option'
-    }
-  },
-  country: {
-    type: String,
-    required: [true, 'Country is required'],
-    trim: true
-  },
-  state: {
-    type: String,
-    required: [true, 'State is required'],
-    trim: true
-  },
-  domain: {
-    type: String,
-    required: [true, 'Domain is required'],
-    enum: {
-      values: ['web', 'app', 'blockchain', 'other'],
-      message: '{VALUE} is not a valid domain option'
-    }
-  },
-  otherDomain: {
-    type: String,
-    required: function() {
-      return this.domain === 'other';
+const mongooseUserSchema = new Schema(
+  {
+    username: {
+      type: String,
+      required: [true, 'Username is required'],
+      trim: true,
+      minLength: [3, 'Username must be at least 3 characters long'],
+      unique: true,
+      index: true,
     },
-    trim: true
-  },
-  race: {
-    type: String,
-    required: [true, 'Race is required'],
-    enum: {
-      values: [
-        'American Indian or Alaska Native',
-        'Asian',
-        'Black or African American',
-        'Hispanic or Latino',
-        'Native Hawaiian or Other Pacific Islander',
-        'White',
-        'Two or More Races'
+    gender: {
+      type: String,
+      required: [true, 'Gender is required'],
+      enum: {
+        values: ['male', 'female', 'other', 'prefer not to say'],
+        message: '{VALUE} is not a valid gender option',
+      },
+    },
+    country: {
+      type: String,
+      required: [true, 'Country is required'],
+      trim: true,
+    },
+    state: {
+      type: String,
+      required: [true, 'State is required'],
+      trim: true,
+    },
+    domain: {
+      type: String,
+      required: [true, 'Domain is required'],
+      enum: {
+        values: ['web', 'app', 'blockchain', 'other'],
+        message: '{VALUE} is not a valid domain option',
+      },
+    },
+    otherDomain: {
+      type: String,
+      required: function () {
+        return this.domain === 'other';
+      },
+      trim: true,
+    },
+    race: {
+      type: String,
+      required: [true, 'Race is required'],
+      enum: {
+        values: [
+          'American Indian or Alaska Native',
+          'Asian',
+          'Black or African American',
+          'Hispanic or Latino',
+          'Native Hawaiian or Other Pacific Islander',
+          'White',
+          'Two or More Races',
+        ],
+        message: '{VALUE} is not a valid race option',
+      },
+    },
+    skills: [
+      {
+        type: String,
+        trim: true,
+        required: [true, 'At least one skill is required'],
+      },
+    ],
+    skillScores: [
+      {
+        skill: {
+          type: String,
+          required: [true, 'Skill is required'],
+        },
+        score: {
+          type: Number,
+          required: [true, 'Score is required'],
+          min: [0, 'Score must be between 0 and 100'],
+          max: [100, 'Score must be between 0 and 100'],
+        },
+      },
+    ],
+    careerGuidance: {
+      type: String,
+      trim: true,
+      maxLength: [50000, 'Career guidance cannot exceed 5000 characters'],
+    },
+    mailId: {
+      type: String,
+      required: [true, 'Email is required'],
+      unique: true,
+      trim: true,
+      lowercase: true,
+      index: true,
+      match: [
+        /^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/,
+        'Please enter a valid email address',
       ],
-      message: '{VALUE} is not a valid race option'
-    }
+    },
   },
-  skills: [{
-    type: String,
-    trim: true,
-    required: [true, 'At least one skill is required']
-  }],
-  mailId: {
-    type: String,
-    required: [true, 'Email is required'],
-    unique: true,
-    trim: true,
-    lowercase: true,
-    index: true,
-    match: [
-      /^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/,
-      'Please enter a valid email address'
-    ]
+  {
+    timestamps: true,
+    toJSON: { virtuals: true },
+    toObject: { virtuals: true },
   }
-}, {
-  timestamps: true,
-  toJSON: { virtuals: true },
-  toObject: { virtuals: true }
-});
+);
 
 // Indexes for better query performance
 mongooseUserSchema.index({ username: 1, mailId: 1 });
 
 // Pre-save middleware for Zod validation
-mongooseUserSchema.pre('save', async function(next) {
+mongooseUserSchema.pre('save', async function (next) {
   try {
     // Only validate if document is new or modified
     if (this.isNew || this.isModified()) {
@@ -124,6 +155,8 @@ mongooseUserSchema.pre('save', async function(next) {
         otherDomain: this.otherDomain,
         race: this.race,
         skills: this.skills,
+        skillScores: this.skillScores,
+        careerGuidance: this.careerGuidance,
         mailId: this.mailId,
       });
     }
@@ -134,7 +167,7 @@ mongooseUserSchema.pre('save', async function(next) {
 });
 
 // Pre-save middleware for otherDomain validation
-mongooseUserSchema.pre('save', function(next) {
+mongooseUserSchema.pre('save', function (next) {
   if (this.domain === 'other' && !this.otherDomain) {
     next(new Error('Other domain specification is required when domain is "other"'));
   }
@@ -142,7 +175,7 @@ mongooseUserSchema.pre('save', function(next) {
 });
 
 // Error handling for duplicate key errors
-mongooseUserSchema.post('save', function(error, doc, next) {
+mongooseUserSchema.post('save', function (error, doc, next) {
   if (error.name === 'MongoServerError' && error.code === 11000) {
     const field = Object.keys(error.keyPattern)[0];
     next(new Error(`${field === 'username' ? 'Username' : 'Email'} already exists`));
@@ -162,9 +195,10 @@ try {
 module.exports = {
   schemas: {
     SkillSchema,
-    UserSchema
+    UserSchema,
+    SkillScoreSchema,
   },
   models: {
-    User
-  }
+    User,
+  },
 };

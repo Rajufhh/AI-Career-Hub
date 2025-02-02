@@ -4,6 +4,7 @@ import { AuthProvider } from "@/providers";
 import { Navbar } from "@/components/Navbar";
 import AnimatedWrapper from "@/components/AnimatedWrapper";
 import Script from "next/script";
+import ChatbotController from "@/components/ChatbotController";  // Add this import
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -25,8 +26,8 @@ export default function RootLayout({ children }) {
     <html lang="en">
       <head>
         {/* Botpress Webchat Scripts */}
-        <Script src="https://cdn.botpress.cloud/webchat/v2.2/inject.js" strategy="afterInteractive" />
-        <Script src="https://files.bpcontent.cloud/2025/01/27/19/20250127193107-0FV93D6I.js" strategy="afterInteractive" />
+        {/* <Script src="https://cdn.botpress.cloud/webchat/v2.2/inject.js" strategy="afterInteractive" />
+        <Script src="https://files.bpcontent.cloud/2025/01/27/19/20250127193107-0FV93D6I.js" strategy="afterInteractive" /> */}
       </head>
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
@@ -34,6 +35,7 @@ export default function RootLayout({ children }) {
         <AuthProvider>
           <Navbar />
           <AnimatedWrapper>{children}</AnimatedWrapper>
+          {/* <ChatbotController /> */}
         </AuthProvider>
       </body>
     </html>

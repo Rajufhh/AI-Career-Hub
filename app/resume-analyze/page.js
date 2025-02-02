@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { FileUp } from "lucide-react";
 import { ProtectedRoute } from "@/services/routeProtectionService";
+import ChatbotController from '@/components/ChatbotController';
 
 export default function Home() {
   const [jobDescription, setJobDescription] = useState("");
@@ -111,6 +112,7 @@ export default function Home() {
             </div>
           )}
         </div>
+        <ChatbotController />
       </div>
     </ProtectedRoute>
   );

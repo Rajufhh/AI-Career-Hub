@@ -91,7 +91,7 @@ def analyze_video(video_path):
 
         cheating_detected = (
             face_missing_count > total_frames * 0.1 or
-            multiple_faces_count > 5 or
+            multiple_faces_count > 1 or
             lip_movement_count > total_frames * 0.15 or
             head_movement_count > total_frames * 0.2
         )

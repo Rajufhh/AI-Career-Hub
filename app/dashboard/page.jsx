@@ -1,14 +1,17 @@
 "use client"
 
 import { useSession } from "next-auth/react"
-import { redirect } from "next/navigation"
+import { redirect, useRouter } from "next/navigation"
 import { BarChart, BookOpen, TrendingUp } from "lucide-react"
+import { ProtectedRoute } from "@/services/routeProtectionService";
+import ChatbotController from '@/components/ChatbotController';
 
 export default function Dashboard() {
+  const router = useRouter();
   const { data: session, status } = useSession({
     required: true,
     onUnauthenticated() {
-      redirect("/auth/signin")
+      redirect("/")
     },
   })
 
@@ -20,35 +23,47 @@ export default function Dashboard() {
     )
   }
 
+  const handleCardClick = (route) => {
+    router.push(route);
+  };
+
   return (
+    <ProtectedRoute>
     <div className="min-h-screen bg-[#0D1117] flex flex-col">
       <main className="flex-grow container mx-auto px-4 py-16">
+        
         <h1 className="text-3xl font-bold mb-8 text-transparent bg-clip-text bg-gradient-to-r from-[#E31D65] to-[#FF6B2B]">
           Welcome to your Dashboard, {session.user?.name}!
         </h1>
+        
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
           <DashboardCard
             title="Skill Assessments"
             description="Take AI-proctored assessments to evaluate your skills."
             icon={<BookOpen className="h-8 w-8 text-primary-start" />}
+            onClick={() => handleCardClick("/profile")}
           />
-          <DashboardCard
+          {/* <DashboardCard
             title="Progress Tracking"
             description="Monitor your skill development over time."
             icon={<TrendingUp className="h-8 w-8 text-primary-end" />}
-          />
+          /> */}
           <DashboardCard
-            title="Career Insights"
-            description="Get personalized career recommendations based on your skills."
+            title="Career Counseling"
+            description="Personalized career recommendations based on your skills."
             icon={<BarChart className="h-8 w-8 text-primary-start" />}
+            onClick={() => handleCardClick("/counseling")}
           />
         </div>
+        
       </main>
+      <ChatbotController />
     </div>
+    </ProtectedRoute>
   )
 }
 
-function DashboardCard({ title, description, icon }) {
+function DashboardCard({ title, description, icon, onClick }) {
   return (
     <div className="bg-[#161B22] p-6 rounded-lg shadow-md hover:shadow-lg transition-shadow duration-200">
       <div className="flex items-center mb-4">
@@ -56,7 +71,10 @@ function DashboardCard({ title, description, icon }) {
         <h2 className="text-xl font-semibold ml-4 text-white">{title}</h2>
       </div>
       <p className="text-gray-400">{description}</p>
-      <button className="mt-4 w-full px-4 py-2 bg-gradient-to-r from-[#E31D65] to-[#FF6B2B] text-white rounded-lg hover:opacity-90 transition-opacity duration-200">
+      <button 
+        onClick={onClick}
+        className="mt-4 w-full px-4 py-2 bg-gradient-to-r from-[#E31D65] to-[#FF6B2B] text-white rounded-lg hover:opacity-90 transition-opacity duration-200"
+      >
         Learn More
       </button>
     </div>

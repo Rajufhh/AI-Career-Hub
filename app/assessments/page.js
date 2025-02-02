@@ -224,22 +224,32 @@ const ProctoredSkillTest = () => {
     startTest(); // Restart proctoring
   };
 
-  const handleBackToProfile = () => {
+  const handleBackToProfile = async () => {
     if (cheatingDetected) {
       setWarning("Cannot proceed due to detected violations during the test");
       return;
     }
-
+  
     try {
-      const testResults = JSON.parse(
-        localStorage.getItem("testResults") || "{}"
-      );
-      testResults[skill] = score;
-      localStorage.setItem("testResults", JSON.stringify(testResults));
+      const response = await fetch('/api/update-skill-score', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          skill: skill,
+          score: score
+        })
+      });
+  
+      if (!response.ok) {
+        throw new Error('Failed to update skill score');
+      }
+  
       window.location.href = "/profile";
     } catch (error) {
       console.error("Error saving test results:", error);
-      window.location.href = "/profile";
+      setWarning("Failed to save test results. Please try again.");
     }
   };
 
@@ -337,6 +347,7 @@ const ProctoredSkillTest = () => {
             })}
           </div>
 
+          {/* niche wale 2 buttons */}
           <div className="flex gap-4 mt-6">
             <button
               onClick={handleRetake}
@@ -356,6 +367,8 @@ const ProctoredSkillTest = () => {
               Back to Profile
             </button>
           </div>
+          {/* niche wale 2 buttons */}
+
           {warning && (
             <div className="mt-4 p-4 bg-yellow-500 bg-opacity-20 rounded-lg text-yellow-300">
               {warning}

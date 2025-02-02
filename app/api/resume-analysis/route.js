@@ -123,10 +123,6 @@ export async function POST(request) {
     const result = await chatSession.sendMessage(
       `Job Description: ${jobDescription}`
     );
-    console.log(result);
-    console.log(JSON.stringify(result));
-    console.log(result.response);
-    console.log(JSON.stringify(result.response));
     const text = result.response.text();
     const renderedText = md.render(text); // Render the text with markdown-it
 

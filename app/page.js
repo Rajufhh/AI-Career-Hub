@@ -5,6 +5,24 @@ import Link from "next/link";
 import { Brain } from "lucide-react";
 import Lottie from "lottie-react";
 import Graphic from "@/assets/Graphic.json";
+const features = [
+  {
+    title: "Proctored Assessments",
+    description:
+      "Take industry-standard skill assessments in a secure environment. Our AI-powered proctoring ensures credibility while you showcase your expertise to potential employers.",
+  },
+  {
+    title: "Personalized Career Guidance",
+    description:
+      "Receive tailored career recommendations based on your skills, interests, and market demands. Our AI analyzes thousands of career paths to find your perfect match.",
+  },
+  {
+    title: "Resume Analyzer",
+    description:
+      "Get instant feedback on your resume with our AI-powered analysis tool. Improve your resume's impact with suggestions for keywords, formatting, and content optimization.",
+  },
+];
+
 export default function Home() {
   const [showFeatures, setShowFeatures] = useState(false);
 
@@ -99,22 +117,15 @@ export default function Home() {
             Key Features
           </h2>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-12">
-            {[
-              "AI-Proctored Assessments",
-              "Personalized Career Guidance",
-              "Real-Time Progress Tracking",
-            ].map((feature, index) => (
+            {features.map((feature, index) => (
               <div
                 key={index}
-                className="bg-[#0D1117] p-6  rounded-lg w-full h-full shadow-md hover:shadow-lg transition-shadow duration-200"
+                className="bg-[#0D1117] p-6 rounded-lg w-full h-full shadow-md hover:shadow-lg transition-shadow duration-200"
               >
                 <h3 className="text-xl font-bold mb-4 pb-3 text-yellow-400">
-                  {feature}
+                  {feature.title}
                 </h3>
-                <p className="text-gray-400">
-                  Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed
-                  do eiusmod tempor incididunt ut labore et dolore magna aliqua.
-                </p>
+                <p className="text-gray-400">{feature.description}</p>
               </div>
             ))}
           </div>
@@ -149,28 +160,25 @@ export default function Home() {
           </Link>
         </div>
       </section>
-      <section className="bg-[#161B22] py-12">
+      <section className="bg-[#161B22] py-20">
+        <div className="container mx-auto px-6 py-12 text-center">
+          <h2 className="text-4xl font-bold bg-gradient-to-r from-[#E31D65] to-[#FF6B2B] text-transparent bg-clip-text mb-10">
+            Resume Analysis
+          </h2>
+          <p className="text-2xl text-gray-300 mb-12">
+            Get your resume analyzed as per the Job Requirement provided by you
+            to know where your resume stands.
+          </p>
+        </div>
+      </section>
+      <section className="bg-[#0D1116] py-12">
         <div className="container mx-auto px-6">
-          <div className="flex flex-col md:flex-row justify-between items-center">
+          <div className="flex flex-col md:flex-row justify-center items-center">
             <div className="flex items-center space-x-2 mb-4 md:mb-0">
               <Brain className="h-8 w-8 text-cyan-400" />
               <span className="text-2xl font-bold bg-gradient-to-r from-[#E31D65] to-[#FF6B2B] text-transparent bg-clip-text">
                 AI Career Hub
               </span>
-            </div>
-            <div className="flex space-x-6">
-              <a href="#" className="hover:text-cyan-400 transition">
-                About
-              </a>
-              <a href="#" className="hover:text-cyan-400 transition">
-                Privacy
-              </a>
-              <a href="#" className="hover:text-cyan-400 transition">
-                Terms
-              </a>
-              <a href="#" className="hover:text-cyan-400 transition">
-                Contact
-              </a>
             </div>
           </div>
           <div className="mt-8 text-center text-gray-500">

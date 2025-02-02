@@ -8,7 +8,7 @@ class GeminiAPI {
   }
 
   async generateQuestions(skill) {
-    const prompt = `Generate 15 multiple choice questions to test someone's knowledge of ${skill}. 
+    const prompt = `Generate 10 multiple choice questions to test someone's knowledge of ${skill}. 
     Each question should have 4 options and one correct answer.
     Return the response in this exact JSON format:
     [
@@ -18,7 +18,7 @@ class GeminiAPI {
         "correctAnswer": "The correct option text"
       }
     ]
-    Make sure the questions are challenging and cover different aspects of ${skill}.`;
+    Make sure the questions are easy to moderate and cover different aspects of ${skill}.`;
 
     const options = {
       method: 'POST',

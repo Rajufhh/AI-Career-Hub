@@ -3,12 +3,16 @@ import { useSession, signIn, signOut } from "next-auth/react";
 import Link from "next/link";
 import { useRouter, usePathname } from "next/navigation";
 import { useState } from 'react';
+import { Menu } from 'lucide-react';
+import Image from 'next/image';
+import { Brain } from "lucide-react";
 
 export function Navbar() {
   const { data: session } = useSession();
   const router = useRouter();
   const pathname = usePathname();
   const [isLoggingOut, setIsLoggingOut] = useState(false);
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
   const handleSignOut = async () => {
     if (pathname.includes('/assessments')) {
@@ -24,16 +28,11 @@ export function Navbar() {
     try {
       setIsLoggingOut(true);
       localStorage.removeItem('testResults');
-      
-      // First navigate to home
       router.push("/");
-      
-      // Then sign out
       await signOut({ 
         redirect: false,
         callbackUrl: "/"
       });
-
     } catch (error) {
       console.error('Error during sign out:', error);
     } finally {
@@ -41,7 +40,10 @@ export function Navbar() {
     }
   };
 
-  // Disable the navbar interactions during logout
+  const toggleMobileMenu = () => {
+    setIsMobileMenuOpen(!isMobileMenuOpen);
+  };
+
   if (isLoggingOut) {
     return (
       <nav className="bg-dark-lighter">
@@ -65,37 +67,52 @@ export function Navbar() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-16">
           <div className="flex items-center">
-            <Link href="/" className="flex-shrink-0 bg-white">
-              <span className="sr-only">Skill Assessment Platform</span>
-              <div className="h-8 w-8 rounded-full gradient-bg"></div>
-            </Link>
+          <Link href="/" className="flex-shrink-0">
+          <span className="sr-only">Skill Assessment Platform</span>
+          <Brain className="h-10 w-10 bg-gradient-to-r from-[#E31D65] to-[#FF6B2B] rounded-lg p-1" />
+          </Link>
           </div>
-          {session ? (
-            <div className="hidden md:block">
-              <div className="ml-10 flex items-baseline space-x-4">
-                <Link
-                  href="/dashboard"
-                  className="text-gray-300 hover:bg-dark hover:text-white px-3 py-2 rounded-md text-base font-medium transition-colors duration-200"
-                >
-                  Dashboard
-                </Link>
-                <Link
-                  href="/assessments"
-                  className="text-gray-300 hover:bg-dark hover:text-white px-3 py-2 rounded-md text-base font-medium transition-colors duration-200"
-                >
-                  Assessments
-                </Link>
-                <Link
-                  href="/counseling"
-                  className="text-gray-300 hover:bg-dark hover:text-white px-3 py-2 rounded-md text-base font-medium transition-colors duration-200"
-                >
-                  Career Counseling
-                </Link>
+          
+          {session && (
+            <>
+              {/* Desktop Menu */}
+              <div className="hidden md:block">
+                <div className="ml-10 flex items-baseline space-x-4">
+                  <Link
+                    href="/dashboard"
+                    className="text-gray-300 hover:bg-dark hover:text-white px-3 py-2 rounded-md text-base font-medium transition-colors duration-200"
+                  >
+                    Dashboard
+                  </Link>
+                  <Link
+                    href="/resume-analyze"
+                    className="text-gray-300 hover:bg-dark hover:text-white px-3 py-2 rounded-md text-base font-medium transition-colors duration-200"
+                  >
+                    Resume Analysis
+                  </Link>
+                  <Link
+                    href="/counseling"
+                    className="text-gray-300 hover:bg-dark hover:text-white px-3 py-2 rounded-md text-base font-medium transition-colors duration-200"
+                  >
+                    Career Counseling
+                  </Link>
+                </div>
               </div>
-            </div>
-          ) : null}
+
+              {/* Mobile Menu Button */}
+              <div className="md:hidden">
+                <button
+                  onClick={toggleMobileMenu}
+                  className="text-gray-300 hover:text-white p-2"
+                >
+                  <Menu size={24} />
+                </button>
+              </div>
+            </>
+          )}
+
           <div className="flex items-center">
-          {session ? (
+            {session ? (
               <>
                 <a href={session.user.profileCompleted ? "/profile" : "/complete-profile"}>
                   <button className="text-gray-300 hover:text-white p-1 rounded-full hover:bg-dark transition-colors duration-200">
@@ -118,9 +135,37 @@ export function Navbar() {
                 Login
               </button>
             )}
-
           </div>
         </div>
+
+        {/* Mobile Menu Dropdown */}
+        {session && isMobileMenuOpen && (
+          <div className="md:hidden">
+            <div className="px-2 pt-2 pb-3 space-y-1 bg-dark-lighter">
+              <Link
+                href="/dashboard"
+                className="text-gray-300 hover:bg-dark hover:text-white block px-3 py-2 rounded-md text-base font-medium transition-colors duration-200"
+                onClick={() => setIsMobileMenuOpen(false)}
+              >
+                Dashboard
+              </Link>
+              <Link
+                href="/resume-analyze"
+                className="text-gray-300 hover:bg-dark hover:text-white block px-3 py-2 rounded-md text-base font-medium transition-colors duration-200"
+                onClick={() => setIsMobileMenuOpen(false)}
+              >
+                Resume Analysis
+              </Link>
+              <Link
+                href="/counseling"
+                className="text-gray-300 hover:bg-dark hover:text-white block px-3 py-2 rounded-md text-base font-medium transition-colors duration-200"
+                onClick={() => setIsMobileMenuOpen(false)}
+              >
+                Career Counseling
+              </Link>
+            </div>
+          </div>
+        )}
       </div>
     </nav>
   );
