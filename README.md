@@ -5,14 +5,29 @@ A comprehensive career guidance platform with AI-powered features including vide
 ## Project Structure
 
 ```
-├── app/                    # Next.js application directory
-│   ├── api/               # API routes
-│   ├── assessments/       # Assessment pages
-│   ├── auth/             # Authentication pages
-│   └── ...               # Other app pages
-├── components/            # React components
-├── server/               # Python backend
-└── utils/                # Utility functions
+📁 AI-Career-Hub
+├── 📁 app
+├── 📁 assets
+├── 📁 components
+├── 📁 db
+├── 📁 lib
+├── 📁 models
+├── 📁 public
+├── 📁 server
+├── 📁 services
+└── 📁 utils
+├── 📄 .gitignore
+├── 📄 ABOUT_BOT.md
+├── 📄 Bot_structure.png
+├── 📄 README.md
+├── 📄 eslint.config.mjs
+├── 📄 jsconfig.json
+├── 📄 next.config.mjs
+├── 📄 package-lock.json
+├── 📄 package.json
+├── 📄 postscs.config.mjs
+├── 📄 providers.js
+└── 📄 tailwind.config.mjs
 ```
 
 ## Prerequisites
