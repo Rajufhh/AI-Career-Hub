@@ -4,7 +4,8 @@ import axios from 'axios';
 class GeminiAPI {
   constructor() {
     this.apiKey = process.env.NEXT_PUBLIC_GEMINI_API_KEY;
-    this.baseUrl = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-pro:generateContent';
+    // this.baseUrl = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-pro:generateContent';
+    this.baseUrl = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash-exp:generateContent';
   }
 
   async generateQuestions(skill) {

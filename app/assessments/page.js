@@ -135,54 +135,102 @@ const ProctoredSkillTest = () => {
     }
   };
 
+  const BACKEND_URL = process.env.NODE_ENV === 'production' 
+  ? 'https://ai-career-hub-2.onrender.com'  // Your backend Render URL
+  : 'http://localhost:3002';
+
   const checkServerConnection = async () => {
     try {
-      const response = await fetch("http://localhost:3001/health");
+      const response = await fetch(`${BACKEND_URL}/health`);
       return response.ok;
     } catch {
       return false;
     }
   };
 
+  // const checkServerConnection = async () => {
+  //   try {
+  //     const response = await fetch("http://localhost:3001/health");
+  //     return response.ok;
+  //   } catch {
+  //     return false;
+  //   }
+  // };
+
+
   const sendToBackend = async (videoBlob) => {
     try {
       const isServerConnected = await checkServerConnection();
       if (!isServerConnected) {
-        throw new Error(
-          "Cannot connect to the analysis server. Please ensure the server is running."
-        );
+        throw new Error("Cannot connect to the analysis server. Please ensure the server is running.");
       }
-
+  
       const formData = new FormData();
       formData.append("video", videoBlob, "recording.webm");
-
-      const response = await fetch("http://localhost:3001/analyze", {
+  
+      const response = await fetch(`${BACKEND_URL}/analyze`, {
         method: "POST",
         body: formData,
       });
-
+  
       if (!response.ok) {
-        const errorData = await response
-          .json()
-          .catch(() => ({ detail: "Unknown error occurred" }));
+        const errorData = await response.json().catch(() => ({ detail: "Unknown error occurred" }));
         throw new Error(errorData.detail || `Server error: ${response.status}`);
       }
-
+  
       const result = await response.json();
       if (!result || typeof result.cheated !== "boolean") {
         throw new Error("Invalid response format from server");
       }
-
+  
       setTestResult(result);
       return result;
     } catch (error) {
       console.error("Analysis error:", error);
-      setWarning(
-        error.message || "Error analyzing test recording. Please try again."
-      );
+      setWarning(error.message || "Error analyzing test recording. Please try again.");
       throw error;
     }
   };
+
+  // const sendToBackend = async (videoBlob) => {
+  //   try {
+  //     const isServerConnected = await checkServerConnection();
+  //     if (!isServerConnected) {
+  //       throw new Error(
+  //         "Cannot connect to the analysis server. Please ensure the server is running."
+  //       );
+  //     }
+
+  //     const formData = new FormData();
+  //     formData.append("video", videoBlob, "recording.webm");
+
+  //     const response = await fetch("http://localhost:3001/analyze", {
+  //       method: "POST",
+  //       body: formData,
+  //     });
+
+  //     if (!response.ok) {
+  //       const errorData = await response
+  //         .json()
+  //         .catch(() => ({ detail: "Unknown error occurred" }));
+  //       throw new Error(errorData.detail || `Server error: ${response.status}`);
+  //     }
+
+  //     const result = await response.json();
+  //     if (!result || typeof result.cheated !== "boolean") {
+  //       throw new Error("Invalid response format from server");
+  //     }
+
+  //     setTestResult(result);
+  //     return result;
+  //   } catch (error) {
+  //     console.error("Analysis error:", error);
+  //     setWarning(
+  //       error.message || "Error analyzing test recording. Please try again."
+  //     );
+  //     throw error;
+  //   }
+  // };
 
   // Quiz functions
   const handleAnswer = (answer) => {

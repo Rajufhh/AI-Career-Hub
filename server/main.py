@@ -6,27 +6,66 @@ import mediapipe as mp
 import tempfile
 import os
 import time
+import logging
+import uvicorn
 
-app = FastAPI()
+# Configure logging
+logging.basicConfig(
+    level=logging.INFO,
+    format='%(asctime)s - %(levelname)s - %(message)s'
+)
+logger = logging.getLogger(__name__)
 
-# Configure CORS
+# Get port from environment variable with fallback to 3002
+PORT = int(os.getenv("PORT", 3002))
+
+app = FastAPI(title="AI Career Hub - Proctoring Service")
+
+# Configure CORS with environment-aware origins
+FRONTEND_URL = os.getenv("FRONTEND_URL", "https://ai-career-hub-v1.onrender.com")
+ALLOWED_ORIGINS = [
+    FRONTEND_URL,
+    "http://localhost:3000",  # Development frontend
+    "http://localhost:3002",  # Development backend
+]
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=[
-        "https://ai-career-hub-v1.onrender.com", // production frontend
-        "http://localhost:3000", // local development
-    ],
+    allow_origins=ALLOWED_ORIGINS,
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
 
-# Add health check endpoint
+@app.get("/")
+async def root():
+    """Root endpoint for API health check"""
+    return {
+        "status": "ok",
+        "message": "AI Career Hub Proctoring Service is running"
+    }
+
 @app.get("/health")
 async def health_check():
-    return {"status": "ok"}
+    """Health check endpoint for monitoring"""
+    return {
+        "status": "ok",
+        "timestamp": time.time()
+    }
 
-def analyze_video(video_path):
+def analyze_video(video_path: str) -> dict:
+    """
+    Analyzes a video file for potential cheating behavior.
+    
+    Args:
+        video_path (str): Path to the video file to analyze
+        
+    Returns:
+        dict: Analysis results including cheating detection and detailed metrics
+        
+    Raises:
+        HTTPException: If video processing fails
+    """
     cap = None
     face_mesh = None
     try:
@@ -50,8 +89,7 @@ def analyze_video(video_path):
         if not cap.isOpened():
             raise Exception("Failed to open video file")
 
-        print("\n=== Starting Test Analysis ===")
-        print("Analyzing video recording...")
+        logger.info("Starting video analysis...")
         start_time = time.time()
 
         while cap.isOpened():
@@ -67,19 +105,14 @@ def analyze_video(video_path):
 
             if not results.multi_face_landmarks:
                 face_missing_count += 1
-                print(".", end="", flush=True)
             elif len(results.multi_face_landmarks) > 1:
                 multiple_faces_count += 1
-                print("M", end="", flush=True)
             else:
                 face_landmarks = results.multi_face_landmarks[0]
                 
                 nose_tip = face_landmarks.landmark[1]
                 if nose_tip.x < 0.3 or nose_tip.x > 0.7:
                     head_movement_count += 1
-                    print("H", end="", flush=True)
-                else:
-                    print(".", end="", flush=True)
 
                 upper_lip = face_landmarks.landmark[13]
                 lower_lip = face_landmarks.landmark[14]
@@ -92,40 +125,36 @@ def analyze_video(video_path):
         if total_frames == 0:
             raise Exception("No frames were processed from the video")
 
+        # Calculate violation percentages
+        face_missing_percentage = (face_missing_count/total_frames) * 100
+        
         cheating_detected = (
-            face_missing_count > total_frames * 0.1 or
-            multiple_faces_count > 1 or
-            lip_movement_count > total_frames * 0.15 or
-            head_movement_count > total_frames * 0.2
+            face_missing_percentage > 10 or  # More than 10% frames without face
+            multiple_faces_count > 1 or      # More than one person detected
+            lip_movement_count > total_frames * 0.15 or  # Excessive lip movement
+            head_movement_count > total_frames * 0.2     # Excessive head movement
         )
 
-        print("\n\n=== Test Analysis Results ===")
-        print(f"Analysis completed in {analysis_time:.2f} seconds")
-        print(f"Total frames analyzed: {total_frames}")
-        print("\nViolations Detected:")
-        print(f"• Face Missing Incidents: {face_missing_count} ({(face_missing_count/total_frames)*100:.1f}% of frames)")
-        print(f"• Multiple Faces Detected: {multiple_faces_count} times")
-        print(f"• Lip Movement Incidents: {lip_movement_count} times")
-        print(f"• Head Movement Violations: {head_movement_count} times")
-        print(f"• Audio Violations: {audio_violations} times")
-        print("\nFinal Verdict:")
-        print("❌ CHEATING DETECTED" if cheating_detected else "✅ NO CHEATING DETECTED")
-        print("=" * 30 + "\n")
+        logger.info(f"Analysis completed in {analysis_time:.2f} seconds")
+        logger.info(f"Total frames analyzed: {total_frames}")
 
         return {
             "cheated": cheating_detected,
             "details": {
                 "faceMissing": face_missing_count,
+                "faceMissingPercentage": round(face_missing_percentage, 2),
                 "multipleFaces": multiple_faces_count,
                 "lipMovement": lip_movement_count,
                 "headMovement": head_movement_count,
-                "audioViolations": audio_violations
+                "audioViolations": audio_violations,
+                "totalFrames": total_frames,
+                "analysisTimeSeconds": round(analysis_time, 2)
             }
         }
     except Exception as e:
+        logger.error(f"Error analyzing video: {str(e)}")
         raise HTTPException(status_code=500, detail=str(e))
     finally:
-        # Properly release resources
         if cap is not None:
             cap.release()
         if face_mesh is not None:
@@ -133,22 +162,45 @@ def analyze_video(video_path):
 
 @app.post("/analyze")
 async def analyze_test_recording(video: UploadFile = File(...)):
+    """
+    Endpoint to analyze a test recording for potential cheating behavior.
+    
+    Args:
+        video (UploadFile): The video file to analyze
+        
+    Returns:
+        dict: Analysis results
+    """
     temp_file = None
     try:
-        # Create temporary file with a specific suffix
+        # Validate file type
+        if not video.filename.endswith(('.webm', '.mp4')):
+            raise HTTPException(
+                status_code=400,
+                detail="Invalid file format. Only .webm and .mp4 files are supported."
+            )
+
+        # Create temporary file
         temp_file = tempfile.NamedTemporaryFile(delete=False, suffix='.webm')
         content = await video.read()
+        
         if not content:
             raise HTTPException(status_code=400, detail="Empty video file received")
         
+        # Write content to temporary file
         temp_file.write(content)
         temp_file.flush()
-        temp_file.close()  # Close the file handle explicitly
+        temp_file.close()
         
         # Analyze the video
+        logger.info(f"Starting analysis for file: {video.filename}")
         result = analyze_video(temp_file.name)
+        
         return result
+    except HTTPException as he:
+        raise he
     except Exception as e:
+        logger.error(f"Error processing video: {str(e)}")
         raise HTTPException(status_code=500, detail=str(e))
     finally:
         # Clean up temporary file
@@ -156,4 +208,15 @@ async def analyze_test_recording(video: UploadFile = File(...)):
             try:
                 os.unlink(temp_file.name)
             except Exception as e:
-                print(f"Warning: Failed to delete temporary file: {e}")
+                logger.warning(f"Failed to delete temporary file: {str(e)}")
+
+if __name__ == "__main__":
+    # Run the application
+    logger.info(f"Starting server on port {PORT}")
+    uvicorn.run(
+        "main:app",
+        host="0.0.0.0",
+        port=PORT,
+        reload=False,  # Disable reload in production
+        workers=1      # Adjust based on your needs
+    )
