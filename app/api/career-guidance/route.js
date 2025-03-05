@@ -98,7 +98,8 @@ GIVE PROPER SPACING BETWEEN EACH SECTION IN YOUR RESPONSE, ADD A \N AFTER EACH S
 `;
 
     // Get Gemini model and generate response
-    const model = genAI.getGenerativeModel({ model: "gemini-pro" });
+    // const model = genAI.getGenerativeModel({ model: "gemini-pro" });
+    const model = genAI.getGenerativeModel({ model: "gemini-2.0-flash-exp" });
     const result = await model.generateContent(prompt);
     const guidance = result.response.text();
 
