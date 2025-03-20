@@ -2,9 +2,9 @@
 import { useSession, signIn, signOut } from "next-auth/react";
 import Link from "next/link";
 import { useRouter, usePathname } from "next/navigation";
-import { useState } from 'react';
-import { Menu } from 'lucide-react';
-import Image from 'next/image';
+import { useState } from "react";
+import { Menu } from "lucide-react";
+import Image from "next/image";
 import { Brain } from "lucide-react";
 
 export function Navbar() {
@@ -15,11 +15,11 @@ export function Navbar() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
   const handleSignOut = async () => {
-    if (pathname.includes('/assessments')) {
+    if (pathname.includes("/assessments")) {
       const confirmLogout = window.confirm(
-        'You are currently in an assessment. If you logout, your progress will be lost. Are you sure you want to logout?'
+        "You are currently in an assessment. If you logout, your progress will be lost. Are you sure you want to logout?"
       );
-      
+
       if (!confirmLogout) {
         return;
       }
@@ -27,14 +27,14 @@ export function Navbar() {
 
     try {
       setIsLoggingOut(true);
-      localStorage.removeItem('testResults');
+      localStorage.removeItem("testResults");
       router.push("/");
-      await signOut({ 
+      await signOut({
         redirect: false,
-        callbackUrl: "/"
+        callbackUrl: "/",
       });
     } catch (error) {
-      console.error('Error during sign out:', error);
+      console.error("Error during sign out:", error);
     } finally {
       setIsLoggingOut(false);
     }
@@ -67,12 +67,12 @@ export function Navbar() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-16">
           <div className="flex items-center">
-          <Link href="/" className="flex-shrink-0">
-          <span className="sr-only">Skill Assessment Platform</span>
-          <Brain className="h-10 w-10 bg-gradient-to-r from-[#E31D65] to-[#FF6B2B] rounded-lg p-1" />
-          </Link>
+            <Link href="/" className="flex-shrink-0">
+              <span className="sr-only">Skill Assessment Platform</span>
+              <Brain className="h-10 w-10 bg-gradient-to-r from-[#E31D65] to-[#FF6B2B] rounded-lg p-1" />
+            </Link>
           </div>
-          
+
           {session && (
             <>
               {/* Desktop Menu */}
@@ -96,6 +96,12 @@ export function Navbar() {
                   >
                     Career Counseling
                   </Link>
+                  <Link
+                    href="/cover-letter"
+                    className="text-gray-300 hover:bg-dark hover:text-white px-3 py-2 rounded-md text-base font-medium transition-colors duration-200"
+                  >
+                    Cover Letter
+                  </Link>
                 </div>
               </div>
 
@@ -114,17 +120,27 @@ export function Navbar() {
           <div className="flex items-center">
             {session ? (
               <>
-                <a href={session.user.profileCompleted ? "/profile" : "/complete-profile"}>
+                <a
+                  href={
+                    session.user.profileCompleted
+                      ? "/profile"
+                      : "/complete-profile"
+                  }
+                >
                   <button className="text-gray-300 hover:text-white p-1 rounded-full hover:bg-dark transition-colors duration-200">
-                    <img src={session.user.image} alt="Profile" className="h-11 w-11 m-3 rounded-full object-cover" />
+                    <img
+                      src={session.user.image}
+                      alt="Profile"
+                      className="h-11 w-11 m-3 rounded-full object-cover"
+                    />
                   </button>
                 </a>
-                <button 
-                  onClick={handleSignOut} 
-                  disabled={isLoggingOut} 
+                <button
+                  onClick={handleSignOut}
+                  disabled={isLoggingOut}
                   className="inline-flex items-center px-4 py-2 border border-transparent text-base font-medium rounded-md text-white bg-gradient-to-r from-[#E31D65] to-[#FF6B2B] hover:opacity-90 transition-opacity duration-200"
                 >
-                  {isLoggingOut ? 'Logging out...' : 'Logout'}
+                  {isLoggingOut ? "Logging out..." : "Logout"}
                 </button>
               </>
             ) : (
@@ -162,6 +178,13 @@ export function Navbar() {
                 onClick={() => setIsMobileMenuOpen(false)}
               >
                 Career Counseling
+              </Link>
+              <Link
+                href="/cover-letter"
+                className="text-gray-300 hover:bg-dark hover:text-white block px-3 py-2 rounded-md text-base font-medium transition-colors duration-200"
+                onClick={() => setIsMobileMenuOpen(false)}
+              >
+                Cover Letter
               </Link>
             </div>
           </div>
