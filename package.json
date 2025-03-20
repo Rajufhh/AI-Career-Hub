@@ -30,7 +30,8 @@
     "react-hot-toast": "^2.5.1",
     "react-markdown": "^9.0.3",
     "remark-gfm": "^4.0.0",
-    "shadcn-ui": "^0.9.4"
+    "shadcn-ui": "^0.9.4",
+    "puppeteer": "^21.3.0"
   },
   "devDependencies": {
     "@eslint/eslintrc": "^3",
