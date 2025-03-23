@@ -10,7 +10,10 @@ import {
   CheckCircle,
   XCircle,
   Loader2,
+  Star,
+  StarHalf,
 } from "lucide-react";
+import { ProtectedRoute } from "@/services/routeProtectionService";
 
 const md = new MarkdownIt();
 
@@ -38,6 +41,13 @@ const ProctoredSkillTest = () => {
   const [answers, setAnswers] = useState({});
   const [score, setScore] = useState(null);
   const [isComplete, setIsComplete] = useState(false);
+
+  // Feedback states
+  const [showFeedback, setShowFeedback] = useState(false);
+  const [feedbackStars, setFeedbackStars] = useState(0);
+  const [feedbackComment, setFeedbackComment] = useState("");
+  const [isSubmittingFeedback, setIsSubmittingFeedback] = useState(false);
+  const [feedbackSubmitted, setFeedbackSubmitted] = useState(false);
 
   // Load questions
   useEffect(() => {
@@ -135,9 +145,10 @@ const ProctoredSkillTest = () => {
     }
   };
 
-  const BACKEND_URL = process.env.NODE_ENV === 'production' 
-  ? 'https://ai-career-hub-2.onrender.com'  // Your backend Render URL
-  : 'http://localhost:3002';
+  const BACKEND_URL =
+    process.env.NODE_ENV === "production"
+      ? "https://ai-career-hub-2.onrender.com" // Your backend Render URL
+      : "http://localhost:3002";
 
   const checkServerConnection = async () => {
     try {
@@ -148,89 +159,45 @@ const ProctoredSkillTest = () => {
     }
   };
 
-  // const checkServerConnection = async () => {
-  //   try {
-  //     const response = await fetch("http://localhost:3001/health");
-  //     return response.ok;
-  //   } catch {
-  //     return false;
-  //   }
-  // };
-
-
   const sendToBackend = async (videoBlob) => {
     try {
       const isServerConnected = await checkServerConnection();
       if (!isServerConnected) {
-        throw new Error("Cannot connect to the analysis server. Please ensure the server is running.");
+        throw new Error(
+          "Cannot connect to the analysis server. Please ensure the server is running."
+        );
       }
-  
+
       const formData = new FormData();
       formData.append("video", videoBlob, "recording.webm");
-  
+
       const response = await fetch(`${BACKEND_URL}/analyze`, {
         method: "POST",
         body: formData,
       });
-  
+
       if (!response.ok) {
-        const errorData = await response.json().catch(() => ({ detail: "Unknown error occurred" }));
+        const errorData = await response
+          .json()
+          .catch(() => ({ detail: "Unknown error occurred" }));
         throw new Error(errorData.detail || `Server error: ${response.status}`);
       }
-  
+
       const result = await response.json();
       if (!result || typeof result.cheated !== "boolean") {
         throw new Error("Invalid response format from server");
       }
-  
+
       setTestResult(result);
       return result;
     } catch (error) {
       console.error("Analysis error:", error);
-      setWarning(error.message || "Error analyzing test recording. Please try again.");
+      setWarning(
+        error.message || "Error analyzing test recording. Please try again."
+      );
       throw error;
     }
   };
-
-  // const sendToBackend = async (videoBlob) => {
-  //   try {
-  //     const isServerConnected = await checkServerConnection();
-  //     if (!isServerConnected) {
-  //       throw new Error(
-  //         "Cannot connect to the analysis server. Please ensure the server is running."
-  //       );
-  //     }
-
-  //     const formData = new FormData();
-  //     formData.append("video", videoBlob, "recording.webm");
-
-  //     const response = await fetch("http://localhost:3001/analyze", {
-  //       method: "POST",
-  //       body: formData,
-  //     });
-
-  //     if (!response.ok) {
-  //       const errorData = await response
-  //         .json()
-  //         .catch(() => ({ detail: "Unknown error occurred" }));
-  //       throw new Error(errorData.detail || `Server error: ${response.status}`);
-  //     }
-
-  //     const result = await response.json();
-  //     if (!result || typeof result.cheated !== "boolean") {
-  //       throw new Error("Invalid response format from server");
-  //     }
-
-  //     setTestResult(result);
-  //     return result;
-  //   } catch (error) {
-  //     console.error("Analysis error:", error);
-  //     setWarning(
-  //       error.message || "Error analyzing test recording. Please try again."
-  //     );
-  //     throw error;
-  //   }
-  // };
 
   // Quiz functions
   const handleAnswer = (answer) => {
@@ -259,17 +226,22 @@ const ProctoredSkillTest = () => {
       const finalScore = calculateScore();
       setScore(finalScore);
       setIsComplete(true);
+      setShowFeedback(true); // Show feedback form after test completion
     }
   };
 
   const handleRetake = () => {
-    setCurrentQuestion(0);
-    setAnswers({});
-    setScore(null);
-    setIsComplete(false);
-    setCheatingDetected(false);
-    setTestResult(null);
-    startTest(); // Restart proctoring
+    submitFeedbackIfNeeded().then(() => {
+      setCurrentQuestion(0);
+      setAnswers({});
+      setScore(null);
+      setIsComplete(false);
+      setCheatingDetected(false);
+      setTestResult(null);
+      setShowFeedback(false);
+      setFeedbackSubmitted(false);
+      startTest(); // Restart proctoring
+    });
   };
 
   const handleBackToProfile = async () => {
@@ -277,27 +249,77 @@ const ProctoredSkillTest = () => {
       setWarning("Cannot proceed due to detected violations during the test");
       return;
     }
-  
+
+    await submitFeedbackIfNeeded();
+
     try {
-      const response = await fetch('/api/update-skill-score', {
-        method: 'POST',
+      const response = await fetch("/api/update-skill-score", {
+        method: "POST",
         headers: {
-          'Content-Type': 'application/json',
+          "Content-Type": "application/json",
         },
         body: JSON.stringify({
           skill: skill,
-          score: score
-        })
+          score: score,
+        }),
       });
-  
+
       if (!response.ok) {
-        throw new Error('Failed to update skill score');
+        throw new Error("Failed to update skill score");
       }
-  
+
       window.location.href = "/profile";
     } catch (error) {
       console.error("Error saving test results:", error);
       setWarning("Failed to save test results. Please try again.");
+    }
+  };
+
+  // Feedback functions
+  const handleStarClick = (rating) => {
+    setFeedbackStars(rating);
+  };
+
+  const submitFeedbackIfNeeded = async () => {
+    if (feedbackSubmitted || feedbackStars === 0) return Promise.resolve();
+
+    if (feedbackStars > 0) {
+      return submitFeedback();
+    }
+
+    return Promise.resolve();
+  };
+
+  const submitFeedback = async () => {
+    if (feedbackStars === 0) {
+      return;
+    }
+
+    try {
+      setIsSubmittingFeedback(true);
+
+      const response = await fetch("/api/submit-feedback", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          section: "assessments",
+          stars: feedbackStars,
+          comment: feedbackComment,
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error("Failed to submit feedback");
+      }
+
+      setFeedbackSubmitted(true);
+    } catch (error) {
+      console.error("Error submitting feedback:", error);
+      setWarning("Failed to submit feedback. Will try again.");
+    } finally {
+      setIsSubmittingFeedback(false);
     }
   };
 
@@ -349,6 +371,84 @@ const ProctoredSkillTest = () => {
     );
   }
 
+  // Feedback component
+  const FeedbackForm = () => {
+    const inputRef = useRef(null);
+    const typingTimeoutRef = useRef(null);
+
+    const handleInputChange = () => {
+      if (typingTimeoutRef.current) {
+        clearTimeout(typingTimeoutRef.current);
+      }
+
+      typingTimeoutRef.current = setTimeout(() => {
+        setFeedbackComment(inputRef.current.value);
+      }, 3500); // Update state after 5000ms (user stops typing)
+    };
+    return (
+      <div className="mt-8 p-4 rounded-lg bg-[#21262D] border border-[#30363D]">
+        <h3 className="text-lg font-semibold text-white mb-3">
+          How was your assessment experience?
+        </h3>
+
+        {!feedbackSubmitted ? (
+          <>
+            <div className="flex items-center justify-center gap-2 mb-4">
+              {[1, 2, 3, 4, 5].map((star) => (
+                <button
+                  key={star}
+                  onClick={() => handleStarClick(star)}
+                  className="focus:outline-none"
+                >
+                  <Star
+                    className={`w-8 h-8 ${
+                      feedbackStars >= star
+                        ? "text-yellow-400 fill-yellow-400"
+                        : "text-gray-500"
+                    } transition-colors duration-200 hover:text-yellow-300`}
+                  />
+                </button>
+              ))}
+            </div>
+
+            <div className="mb-4">
+              <textarea
+                className="w-full p-2 border border-gray-300 rounded-md bg-[#161B22] text-white"
+                ref={inputRef}
+                placeholder="Write your feedback..."
+                onInput={handleInputChange}
+              />
+            </div>
+
+            <button
+              onClick={submitFeedback}
+              disabled={feedbackStars === 0 || isSubmittingFeedback}
+              className={`w-full px-4 py-2 rounded-lg text-white font-medium transition-all duration-200 ${
+                feedbackStars > 0 && !isSubmittingFeedback
+                  ? "bg-gradient-to-r from-[#E31D65] to-[#FF6B2B] hover:opacity-90"
+                  : "bg-gray-500 cursor-not-allowed"
+              }`}
+            >
+              {isSubmittingFeedback ? (
+                <div className="flex items-center justify-center">
+                  <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                  Submitting...
+                </div>
+              ) : (
+                "Submit Feedback"
+              )}
+            </button>
+          </>
+        ) : (
+          <div className="text-center p-2 text-green-400">
+            <CheckCircle className="w-6 h-6 mx-auto mb-2" />
+            Thank you for your feedback!
+          </div>
+        )}
+      </div>
+    );
+  };
+
   // Completion state
   if (isComplete) {
     return (
@@ -395,7 +495,8 @@ const ProctoredSkillTest = () => {
             })}
           </div>
 
-          {/* niche wale 2 buttons */}
+          {showFeedback && <FeedbackForm />}
+
           <div className="flex gap-4 mt-6">
             <button
               onClick={handleRetake}
@@ -415,7 +516,6 @@ const ProctoredSkillTest = () => {
               Back to Profile
             </button>
           </div>
-          {/* niche wale 2 buttons */}
 
           {warning && (
             <div className="mt-4 p-4 bg-yellow-500 bg-opacity-20 rounded-lg text-yellow-300">
@@ -429,144 +529,146 @@ const ProctoredSkillTest = () => {
 
   // Main test UI
   return (
-    <div className="min-h-screen bg-[#0D1117] flex flex-col items-center justify-center p-8">
-      {/* Proctoring UI */}
-      <div className="fixed top-4 left-4 w-[320px] h-[180px] bg-gray-800 rounded-lg overflow-hidden shadow-lg">
-        {isTestStarted ? (
-          <video
-            ref={videoRef}
-            autoPlay
-            playsInline
-            muted
-            className="w-full h-full object-cover transform scale-x-[-1]"
-          />
-        ) : (
-          <div className="flex items-center justify-center h-full">
-            <Camera className="w-8 h-8 text-gray-600" />
-          </div>
-        )}
+    <ProtectedRoute>
+      <div className="min-h-screen bg-[#0D1117] flex flex-col items-center justify-center p-8">
+        {/* Proctoring UI */}
+        <div className="fixed top-4 left-4 w-[320px] h-[180px] bg-gray-800 rounded-lg overflow-hidden shadow-lg">
+          {isTestStarted ? (
+            <video
+              ref={videoRef}
+              autoPlay
+              playsInline
+              muted
+              className="w-full h-full object-cover transform scale-x-[-1]"
+            />
+          ) : (
+            <div className="flex items-center justify-center h-full">
+              <Camera className="w-8 h-8 text-gray-600" />
+            </div>
+          )}
 
-        <Button
-          onClick={isTestStarted ? stopTest : startTest}
-          className="absolute top-2 left-2 bg-red-600 hover:bg-red-700 text-white px-2 py-1 text-sm rounded"
-          disabled={isAnalyzing}
-        >
-          {isTestStarted ? "End Test" : "Start Test"}
-        </Button>
-
-        {warning && (
-          <div className="absolute bottom-2 left-2 right-2 bg-yellow-500 text-white px-2 py-1 text-xs rounded flex items-center gap-1">
-            <AlertTriangle className="w-3 h-3" />
-            {warning}
-          </div>
-        )}
-
-        {isAnalyzing && (
-          <div className="absolute top-2 right-2 bg-yellow-500 text-white px-2 py-1 text-xs rounded flex items-center gap-1">
-            <Loader2 className="w-3 h-3 animate-spin" />
-            Analyzing...
-          </div>
-        )}
-
-        {testResult && (
-          <div
-            className={`absolute bottom-2 left-2 right-2 px-2 py-1 rounded text-white text-xs flex items-center gap-1 ${
-              testResult.cheated ? "bg-red-600" : "bg-green-600"
-            }`}
+          <Button
+            onClick={isTestStarted ? stopTest : startTest}
+            className="absolute top-2 left-2 bg-red-600 hover:bg-red-700 text-white px-2 py-1 text-sm rounded"
+            disabled={isAnalyzing}
           >
-            {testResult.cheated ? (
-              <>
-                <XCircle className="w-3 h-3" />
-                Violations Detected
-              </>
-            ) : (
-              <>
-                <CheckCircle className="w-3 h-3" />
-                No Violations
-              </>
-            )}
-          </div>
-        )}
-      </div>
+            {isTestStarted ? "End Test" : "Start Test"}
+          </Button>
 
-      {/* Main Quiz UI */}
-      <div className="max-w-2xl w-full bg-[#161B22] rounded-lg shadow-lg p-6">
-        <div className="flex justify-between items-center mb-4">
-          <p className="text-gray-400">
-            Question {currentQuestion + 1} of {questions.length}
-          </p>
-          <p className="text-gray-400">Assessment: {skill}</p>
-        </div>
+          {warning && (
+            <div className="absolute bottom-2 left-2 right-2 bg-yellow-500 text-white px-2 py-1 text-xs rounded flex items-center gap-1">
+              <AlertTriangle className="w-3 h-3" />
+              {warning}
+            </div>
+          )}
 
-        <div className="mb-6 w-full bg-gray-700 h-2 rounded-full">
-          <div
-            className="bg-gradient-to-r from-[#E31D65] to-[#FF6B2B] h-2 rounded-full transition-all duration-300"
-            style={{
-              width: `${((currentQuestion + 1) / questions.length) * 100}%`,
-            }}
-          ></div>
-        </div>
+          {isAnalyzing && (
+            <div className="absolute top-2 right-2 bg-yellow-500 text-white px-2 py-1 text-xs rounded flex items-center gap-1">
+              <Loader2 className="w-3 h-3 animate-spin" />
+              Analyzing...
+            </div>
+          )}
 
-        <h2
-          className="text-xl text-white font-semibold mb-4"
-          dangerouslySetInnerHTML={{
-            __html: md.render(questions[currentQuestion].question),
-          }}
-        />
-
-        <div className="space-y-4">
-          {questions[currentQuestion].options.map((option, index) => (
+          {testResult && (
             <div
-              key={index}
-              className={`flex items-center space-x-2 p-3 rounded-lg transition-colors duration-200
+              className={`absolute bottom-2 left-2 right-2 px-2 py-1 rounded text-white text-xs flex items-center gap-1 ${
+                testResult.cheated ? "bg-red-600" : "bg-green-600"
+              }`}
+            >
+              {testResult.cheated ? (
+                <>
+                  <XCircle className="w-3 h-3" />
+                  Violations Detected
+                </>
+              ) : (
+                <>
+                  <CheckCircle className="w-3 h-3" />
+                  No Violations
+                </>
+              )}
+            </div>
+          )}
+        </div>
+
+        {/* Main Quiz UI */}
+        <div className="max-w-2xl w-full bg-[#161B22] rounded-lg shadow-lg p-6">
+          <div className="flex justify-between items-center mb-4">
+            <p className="text-gray-400">
+              Question {currentQuestion + 1} of {questions.length}
+            </p>
+            <p className="text-gray-400">Assessment: {skill}</p>
+          </div>
+
+          <div className="mb-6 w-full bg-gray-700 h-2 rounded-full">
+            <div
+              className="bg-gradient-to-r from-[#E31D65] to-[#FF6B2B] h-2 rounded-full transition-all duration-300"
+              style={{
+                width: `${((currentQuestion + 1) / questions.length) * 100}%`,
+              }}
+            ></div>
+          </div>
+
+          <h2
+            className="text-xl text-white font-semibold mb-4"
+            dangerouslySetInnerHTML={{
+              __html: md.render(questions[currentQuestion].question),
+            }}
+          />
+
+          <div className="space-y-4">
+            {questions[currentQuestion].options.map((option, index) => (
+              <div
+                key={index}
+                className={`flex items-center space-x-2 p-3 rounded-lg transition-colors duration-200
                 ${
                   answers[currentQuestion] === option
                     ? "bg-[#21262D] border border-[#E31D65]"
                     : "hover:bg-[#21262D] border border-transparent"
                 } cursor-pointer`}
-              onClick={() => handleAnswer(option)}
-            >
-              <input
-                type="radio"
-                id={`option-${index}`}
-                name="question-option"
-                value={option}
-                checked={answers[currentQuestion] === option}
-                onChange={(e) => handleAnswer(e.target.value)}
-                className="w-4 h-4 text-[#E31D65] bg-gray-100 border-gray-300 focus:ring-[#E31D65]"
-              />
-              <label
-                htmlFor={`option-${index}`}
-                className="text-sm font-medium text-gray-300 cursor-pointer flex-1"
-                dangerouslySetInnerHTML={{ __html: md.render(option) }}
-              />
-            </div>
-          ))}
-        </div>
+                onClick={() => handleAnswer(option)}
+              >
+                <input
+                  type="radio"
+                  id={`option-${index}`}
+                  name="question-option"
+                  value={option}
+                  checked={answers[currentQuestion] === option}
+                  onChange={(e) => handleAnswer(e.target.value)}
+                  className="w-4 h-4 text-[#E31D65] bg-gray-100 border-gray-300 focus:ring-[#E31D65]"
+                />
+                <label
+                  htmlFor={`option-${index}`}
+                  className="text-sm font-medium text-gray-300 cursor-pointer flex-1"
+                  dangerouslySetInnerHTML={{ __html: md.render(option) }}
+                />
+              </div>
+            ))}
+          </div>
 
-        <div className="mt-6 flex items-center justify-between">
-          {!isTestStarted && (
-            <div className="text-yellow-500 text-sm">
-              Please start the proctoring system to begin the test
-            </div>
-          )}
-          <button
-            onClick={handleNext}
-            disabled={!answers[currentQuestion] || !isTestStarted}
-            className={`w-full px-4 py-2 rounded-lg text-white font-medium transition-all duration-200
+          <div className="mt-6 flex items-center justify-between">
+            {!isTestStarted && (
+              <div className="text-yellow-500 text-sm">
+                Please start the proctoring system to begin the test
+              </div>
+            )}
+            <button
+              onClick={handleNext}
+              disabled={!answers[currentQuestion] || !isTestStarted}
+              className={`w-full px-4 py-2 rounded-lg text-white font-medium transition-all duration-200
               ${
                 answers[currentQuestion] && isTestStarted
                   ? "bg-gradient-to-r from-[#E31D65] to-[#FF6B2B] hover:opacity-90"
                   : "bg-gray-500 cursor-not-allowed"
               }`}
-          >
-            {currentQuestion === questions.length - 1
-              ? "Finish Assessment"
-              : "Next Question"}
-          </button>
+            >
+              {currentQuestion === questions.length - 1
+                ? "Finish Assessment"
+                : "Next Question"}
+            </button>
+          </div>
         </div>
       </div>
-    </div>
+    </ProtectedRoute>
   );
 };
 
