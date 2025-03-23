@@ -1,9 +1,7 @@
 "use client";
 
-// This forces dynamic rendering in Next.js 13+ so that useSearchParams() won't cause a static generation error.
-export const dynamic = "force-dynamic";
-
-import React, { useState, useEffect } from "react";
+import React from "react";
+import { Suspense } from "react";
 import { useSearchParams } from "next/navigation";
 import MarkdownIt from "markdown-it";
 import { Button } from "@/components/ui/button";
@@ -102,34 +100,54 @@ const CAREER_DOMAINS = [
   },
 ];
 
-const BeginnerAssessment = () => {
+// This is the main page component that will be the default export
+export default function BeginnerAssessmentPage() {
+  return (
+    <Suspense fallback={<LoadingState message="Loading assessment..." />}>
+      <BeginnerAssessment />
+    </Suspense>
+  );
+}
+
+// Loading component
+const LoadingState = ({ message = "Loading..." }) => (
+  <div className="min-h-screen bg-[#0D1117] flex flex-col items-center justify-center space-y-4">
+    <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-white"></div>
+    <div className="text-white text-xl">{message}</div>
+  </div>
+);
+
+// This is the client component that uses useSearchParams
+function BeginnerAssessment() {
   const searchParams = useSearchParams();
   const initialDomain = searchParams.get("domain");
 
   // State variables
-  const [step, setStep] = useState(initialDomain ? 2 : 1); // Start with domain selection if no domain in URL
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState(null);
-  const [selectedDomain, setSelectedDomain] = useState(initialDomain || "");
-  const [currentCategory, setCurrentCategory] = useState(0);
-  const [questions, setQuestions] = useState([]);
-  const [currentQuestion, setCurrentQuestion] = useState(0);
-  const [answers, setAnswers] = useState({});
-  const [results, setResults] = useState(null);
-  const [isComplete, setIsComplete] = useState(false);
-  const [loadingMessage, setLoadingMessage] = useState(
+  const [step, setStep] = React.useState(initialDomain ? 2 : 1); // Start with domain selection if no domain in URL
+  const [loading, setLoading] = React.useState(false);
+  const [error, setError] = React.useState(null);
+  const [selectedDomain, setSelectedDomain] = React.useState(
+    initialDomain || ""
+  );
+  const [currentCategory, setCurrentCategory] = React.useState(0);
+  const [questions, setQuestions] = React.useState([]);
+  const [currentQuestion, setCurrentQuestion] = React.useState(0);
+  const [answers, setAnswers] = React.useState({});
+  const [results, setResults] = React.useState(null);
+  const [isComplete, setIsComplete] = React.useState(false);
+  const [loadingMessage, setLoadingMessage] = React.useState(
     "Generating assessment questions..."
   );
 
   // Feedback states
-  const [showFeedback, setShowFeedback] = useState(false);
-  const [feedbackStars, setFeedbackStars] = useState(0);
-  const [feedbackComment, setFeedbackComment] = useState("");
-  const [isSubmittingFeedback, setIsSubmittingFeedback] = useState(false);
-  const [feedbackSubmitted, setFeedbackSubmitted] = useState(false);
+  const [showFeedback, setShowFeedback] = React.useState(false);
+  const [feedbackStars, setFeedbackStars] = React.useState(0);
+  const [feedbackComment, setFeedbackComment] = React.useState("");
+  const [isSubmittingFeedback, setIsSubmittingFeedback] = React.useState(false);
+  const [feedbackSubmitted, setFeedbackSubmitted] = React.useState(false);
 
   // Load questions when first starting the assessment
-  useEffect(() => {
+  React.useEffect(() => {
     if (step === 3 && selectedDomain && questions.length === 0) {
       loadQuestions();
     }
@@ -326,12 +344,7 @@ const BeginnerAssessment = () => {
 
   // Loading state
   if (loading) {
-    return (
-      <div className="min-h-screen bg-[#0D1117] flex flex-col items-center justify-center space-y-4">
-        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-white"></div>
-        <div className="text-white text-xl">{loadingMessage}</div>
-      </div>
-    );
+    return <LoadingState message={loadingMessage} />;
   }
 
   // Error state
@@ -742,6 +755,4 @@ const BeginnerAssessment = () => {
       </div>
     </div>
   );
-};
-
-export default BeginnerAssessment;
+}
