@@ -1,4 +1,8 @@
 "use client";
+
+// This forces dynamic rendering in Next.js 13+ so that useSearchParams() won't cause a static generation error.
+export const dynamic = "force-dynamic";
+
 import React, { useState, useEffect } from "react";
 import { useSearchParams } from "next/navigation";
 import MarkdownIt from "markdown-it";
@@ -129,6 +133,7 @@ const BeginnerAssessment = () => {
     if (step === 3 && selectedDomain && questions.length === 0) {
       loadQuestions();
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [step, selectedDomain]);
 
   // Function to load questions from API
@@ -378,7 +383,7 @@ const BeginnerAssessment = () => {
     );
   }
 
-  // Step 2: Assessment Overview (Instead of Category Selection)
+  // Step 2: Assessment Overview
   if (step === 2) {
     const selectedDomainInfo = CAREER_DOMAINS.find(
       (d) => d.id === selectedDomain
@@ -404,7 +409,7 @@ const BeginnerAssessment = () => {
           </p>
 
           <div className="space-y-4">
-            {ASSESSMENT_CATEGORIES.map((category, index) => (
+            {ASSESSMENT_CATEGORIES.map((category) => (
               <div
                 key={category.id}
                 className="w-full p-4 bg-[#21262D] rounded-lg text-left flex items-center"
