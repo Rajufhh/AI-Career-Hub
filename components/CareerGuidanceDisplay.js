@@ -9,6 +9,9 @@ import {
   Rocket,
   Globe,
 } from "lucide-react";
+import MarkdownIt from "markdown-it";
+
+const md = new MarkdownIt();
 
 const CareerGuidanceDisplay = ({ guidance }) => {
   // Function to parse the guidance text into sections
@@ -106,51 +109,57 @@ const CareerGuidanceDisplay = ({ guidance }) => {
 
   const sections = parseGuidance(guidance);
 
-  // Format content with proper styling
-  const formatContent = (content) => {
-    // Clean up the content first - remove any "N" artifacts that might be in the text
-    let cleanedContent = content.replace(/\*\*N\*\*\s*/g, "");
-
-    // Replace subsection headers with styled versions
-    let formattedContent = cleanedContent.replace(
+  // Pre-process content to ensure consistent markdown formatting
+  const preprocessContent = (content) => {
+    // Convert section headers to markdown headers
+    let processedContent = content.replace(
       /([A-Za-z\s]+):/g,
+      '**$1:**'
+    );
+    
+    // Convert career option headers with triple asterisks to h4
+    processedContent = processedContent.replace(
+      /\*\*\*([^*]+)\*\*/g,
+      '#### $1'
+    );
+    
+    return processedContent;
+  };
+
+  // Apply custom styling to the rendered HTML
+  const customizeRenderedHtml = (html) => {
+    // Style headers
+    let styledHtml = html.replace(
+      /<h4>([^<]+)<\/h4>/g,
+      '<h4 class="text-xl font-semibold text-rose-500 mt-4 mb-2">$1</h4>'
+    );
+    
+    // Style strong elements (bold text)
+    styledHtml = styledHtml.replace(
+      /<strong>([^:]+):<\/strong>/g,
       '<span class="text-orange-400 font-semibold">$1:</span>'
     );
-
-    // Handle career path options with asterisks (***Option Name**) and format them properly
-    formattedContent = formattedContent.replace(
-      /\*\*\*([^*]+)\*\*/g,
-      '<h4 class="text-xl font-semibold text-rose-500 mt-4 mb-2">$1:</h4>'
+    
+    // Style list items
+    styledHtml = styledHtml.replace(
+      /<li>([^<]+)<\/li>/g,
+      '<li class="ml-4 my-2">$1</li>'
     );
-
-    // Handle bold text with double asterisks that's not part of a header
-    formattedContent = formattedContent.replace(
-      /\*\*([^*:]+)\*\*/g,
-      '<span class="font-semibold text-white">$1</span>'
+    
+    // Style bullet points
+    styledHtml = styledHtml.replace(
+      /<ul>/g,
+      '<ul class="my-2 space-y-2">'
     );
+    
+    return styledHtml;
+  };
 
-    // Handle experience level, salary range, etc. with single dash (-)
-    formattedContent = formattedContent.replace(
-      /-\*\*([^:]+):\*\*/g,
-      '<div class="ml-4 my-2"><span class="text-orange-400 font-semibold">$1:</span>'
-    );
-
-    // Handle bullet points with dashes
-    formattedContent = formattedContent.replace(
-      /• ([^\n]+)/g,
-      '<div class="flex items-start my-2 ml-4"><div class="text-orange-400 mr-2">•</div><div>$1</div></div>'
-    );
-
-    // Close any divs opened by the previous regex
-    formattedContent = formattedContent.replace(/\n/g, "</div>\n");
-
-    // Convert blank lines to paragraph breaks
-    formattedContent = formattedContent.replace(
-      /\n\n/g,
-      '</p><p class="my-3">'
-    );
-
-    return formattedContent;
+  // Render content using markdown-it
+  const renderContent = (content) => {
+    const preprocessed = preprocessContent(content);
+    const renderedHtml = md.render(preprocessed);
+    return customizeRenderedHtml(renderedHtml);
   };
 
   return (
@@ -182,9 +191,9 @@ const CareerGuidanceDisplay = ({ guidance }) => {
           </div>
 
           <div
-            className="text-gray-300 leading-relaxed"
+            className="text-gray-300 leading-relaxed prose prose-invert max-w-none"
             dangerouslySetInnerHTML={{
-              __html: `<p>${formatContent(section.content)}</p>`,
+              __html: renderContent(section.content),
             }}
           />
         </div>

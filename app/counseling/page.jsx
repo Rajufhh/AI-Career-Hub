@@ -1,3 +1,4 @@
+// /counseling/page.jsx
 "use client";
 import React, { useState, useEffect } from "react";
 import { ProtectedRoute } from "@/services/routeProtectionService";
