@@ -18,7 +18,7 @@ const CareerGuidanceDisplay = ({ guidance }) => {
   // Function to parse the guidance text into sections
   const parseGuidance = (text) => {
     if (!text) return [];
-
+  
     const sections = [
       {
         id: "profile",
@@ -46,20 +46,23 @@ const CareerGuidanceDisplay = ({ guidance }) => {
         icon: <Globe size={24} />,
       },
     ];
-
-    // Extract content for each section
+  
     const parsedSections = sections.map((section, index) => {
       const startIndex = text.indexOf(section.title);
       const endIndex = index < sections.length - 1 ? text.indexOf(sections[index + 1].title) : text.length;
-
+  
       const content = text.substring(startIndex, endIndex).trim();
-
+  
+      // Clean up the content by removing the section title
+      const cleanedContent = content.replace(section.title, '').trim();
+  
+      // Remove any unwanted characters (like ** or **2)
       return {
         ...section,
-        content: content.replace(section.title, '').trim(), // Remove the title from the content
+        content: cleanedContent.replace(/\*\*|\*\*\d+/g, '').trim(), // Remove unwanted asterisks
       };
     });
-
+  
     return parsedSections;
   };
 
