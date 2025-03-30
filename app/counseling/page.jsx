@@ -42,7 +42,7 @@ function CareerGuidance() {
     const fetchUserData = async () => {
       try {
         setLoading(true);
-        const response = await fetch("/api/get-user");
+        const response = await fetch("/api/get-userr");
 
         if (!response.ok) {
           if (response.status === 401) {
