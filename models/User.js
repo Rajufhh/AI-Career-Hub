@@ -15,18 +15,20 @@ const UserSchema = z.object({
   gender: z.enum(["male", "female", "other", "prefer not to say"]),
   country: z.string().min(2).trim(),
   state: z.string().min(2).trim(),
-  domain: z.enum(["web", "app", "blockchain", "other"]),
+  domain: z.enum(["web", "app", "blockchain", "other"]).optional(),
   otherDomain: z.string().optional(),
-  race: z.enum([
-    "American Indian or Alaska Native",
-    "Asian",
-    "Black or African American",
-    "Hispanic or Latino",
-    "Native Hawaiian or Other Pacific Islander",
-    "White",
-    "Two or More Races",
-  ]),
-  skills: z.array(SkillSchema),
+  race: z
+    .enum([
+      "American Indian or Alaska Native",
+      "Asian",
+      "Black or African American",
+      "Hispanic or Latino",
+      "Native Hawaiian or Other Pacific Islander",
+      "White",
+      "Two or More Races",
+    ])
+    .optional(),
+  skills: z.array(SkillSchema).optional(),
   skillScores: z.array(SkillScoreSchema).optional(),
   careerGuidance: z.string().max(50000).optional(), // New field for career guidance
   mailId: z.string().email().trim().toLowerCase(),
@@ -63,7 +65,7 @@ const mongooseUserSchema = new Schema(
     },
     domain: {
       type: String,
-      required: [true, "Domain is required"],
+      required: false,
       enum: {
         values: ["web", "app", "blockchain", "other"],
         message: "{VALUE} is not a valid domain option",
@@ -78,7 +80,7 @@ const mongooseUserSchema = new Schema(
     },
     race: {
       type: String,
-      required: [true, "Race is required"],
+      required: false,
       enum: {
         values: [
           "American Indian or Alaska Native",
@@ -92,13 +94,11 @@ const mongooseUserSchema = new Schema(
         message: "{VALUE} is not a valid race option",
       },
     },
-    skills: [
-      {
-        type: String,
-        trim: true,
-        required: [true, "At least one skill is required"],
-      },
-    ],
+    skills: {
+      type: [String],
+      required: false,
+      trim: true,
+    },
     skillScores: [
       {
         skill: {
@@ -116,7 +116,7 @@ const mongooseUserSchema = new Schema(
     careerGuidance: {
       type: String,
       trim: true,
-      maxLength: [50000, "Career guidance cannot exceed 5000 characters"],
+      maxLength: [50000, "Career guidance cannot exceed 50000 characters"],
     },
     mailId: {
       type: String,
@@ -154,7 +154,7 @@ mongooseUserSchema.pre("save", async function (next) {
         domain: this.domain,
         otherDomain: this.otherDomain,
         race: this.race,
-        skills: this.skills,
+        skills: this.skills || [],
         skillScores: this.skillScores,
         careerGuidance: this.careerGuidance,
         mailId: this.mailId,
