@@ -106,30 +106,48 @@ const CareerGuidanceDisplay = ({ guidance }) => {
 
   const sections = parseGuidance(guidance);
 
-  // Replace subsection headers with styled versions
+  // Format content with proper styling
   const formatContent = (content) => {
-    // Replace subsection headers with styled ones
-    let formattedContent = content.replace(
+    // Clean up the content first - remove any "N" artifacts that might be in the text
+    let cleanedContent = content.replace(/\*\*N\*\*\s*/g, "");
+
+    // Replace subsection headers with styled versions
+    let formattedContent = cleanedContent.replace(
       /([A-Za-z\s]+):/g,
       '<span class="text-orange-400 font-semibold">$1:</span>'
     );
 
-    // Handle career path options (a), b), c), etc.)
+    // Handle career path options with asterisks (***Option Name**) and format them properly
     formattedContent = formattedContent.replace(
-      /([a-z]\))\s*([A-Za-z\-\s]+)(\s*\(.+?\))?:/g,
-      '<h4 class="text-xl font-semibold text-rose-500 mt-4 mb-2">$1 $2$3:</h4>'
+      /\*\*\*([^*]+)\*\*/g,
+      '<h4 class="text-xl font-semibold text-rose-500 mt-4 mb-2">$1:</h4>'
     );
+
+    // Handle bold text with double asterisks that's not part of a header
+    formattedContent = formattedContent.replace(
+      /\*\*([^*:]+)\*\*/g,
+      '<span class="font-semibold text-white">$1</span>'
+    );
+
+    // Handle experience level, salary range, etc. with single dash (-)
+    formattedContent = formattedContent.replace(
+      /-\*\*([^:]+):\*\*/g,
+      '<div class="ml-4 my-2"><span class="text-orange-400 font-semibold">$1:</span>'
+    );
+
+    // Handle bullet points with dashes
+    formattedContent = formattedContent.replace(
+      /• ([^\n]+)/g,
+      '<div class="flex items-start my-2 ml-4"><div class="text-orange-400 mr-2">•</div><div>$1</div></div>'
+    );
+
+    // Close any divs opened by the previous regex
+    formattedContent = formattedContent.replace(/\n/g, "</div>\n");
 
     // Convert blank lines to paragraph breaks
     formattedContent = formattedContent.replace(
       /\n\n/g,
       '</p><p class="my-3">'
-    );
-
-    // Handle bullet points with dashes
-    formattedContent = formattedContent.replace(
-      /- ([^\n]+)/g,
-      '<div class="flex items-start my-2"><div class="text-orange-400 mr-2">•</div><div>$1</div></div>'
     );
 
     return formattedContent;
