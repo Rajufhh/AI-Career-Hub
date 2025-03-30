@@ -6,7 +6,6 @@ import { authOptions } from "../auth/[...nextauth]/route";
 import { models } from "@/models/User";
 const { User } = models;
 
-
 const genAI = new GoogleGenerativeAI(process.env.GOOGLE_API_KEY);
 
 export async function GET() {
@@ -28,29 +27,34 @@ export async function GET() {
     }
 
     // Check if all skills have scores
-    const allSkillsHaveScores = user.skills.every(skill => 
-      user.skillScores?.some(score => score.skill === skill)
+    const allSkillsHaveScores = user.skills.every((skill) =>
+      user.skillScores?.some((score) => score.skill === skill)
     );
 
     if (!allSkillsHaveScores) {
-      return NextResponse.json({ 
-        error: "Please complete skill assessments for all skills before requesting career guidance" 
-      }, { status: 400 });
+      return NextResponse.json(
+        {
+          error:
+            "Please complete skill assessments for all skills before requesting career guidance",
+        },
+        { status: 400 }
+      );
     }
 
     // Prepare skills data for prompt
     const skillsText = user.skillScores
-      .map(score => `${score.skill}: ${score.score}/100`)
-      .join('\n');
-    
+      .map((score) => `${score.skill}: ${score.score}/100`)
+      .join("\n");
 
-      console.log("userr",user.username);
+    console.log("userr", user.username);
     // Create prompt for Gemini
     const prompt = `Act as a career counselor with extensive experience in technology and professional development.
 
 Personal Information:
 Name: ${user.username}
-Domain of Interest: ${user.domain}${user.otherDomain ? ` (${user.otherDomain})` : ''}
+Domain of Interest: ${user.domain}${
+      user.otherDomain ? ` (${user.otherDomain})` : ""
+    }
 Gender: ${user.gender}
 Race: ${user.race}
 Country: ${user.country}
@@ -94,7 +98,6 @@ Suggest key milestones and achievements to target
 - Personal branding strategies
 
 Please provide detailed, actionable insights that take into account the individual's background, current location, and market conditions. Include specific examples and resources where applicable.
-GIVE PROPER SPACING BETWEEN EACH SECTION IN YOUR RESPONSE, ADD A \N AFTER EACH SECTION IN REPORT
 `;
 
     // Get Gemini model and generate response
@@ -106,15 +109,15 @@ GIVE PROPER SPACING BETWEEN EACH SECTION IN YOUR RESPONSE, ADD A \N AFTER EACH S
     // Save guidance to database
     console.log("savingg");
     try {
-        user.careerGuidance = guidance;
-        await user.save();
-      } catch (saveError) {
-        console.error("Error saving to database:", saveError);
-        return NextResponse.json(
-          { error: "Failed to save career guidance to database" },
-          { status: 500 }
-        );
-      }
+      user.careerGuidance = guidance;
+      await user.save();
+    } catch (saveError) {
+      console.error("Error saving to database:", saveError);
+      return NextResponse.json(
+        { error: "Failed to save career guidance to database" },
+        { status: 500 }
+      );
+    }
 
     return NextResponse.json({ guidance });
   } catch (error) {

@@ -1,9 +1,9 @@
 "use client";
 import React, { useState, useEffect } from "react";
-import MarkdownIt from "markdown-it";
 import { ProtectedRoute } from "@/services/routeProtectionService";
 import ChatbotController from "@/components/ChatbotController";
 import { useRouter } from "next/navigation";
+import CareerGuidanceDisplay from "@/components/CareerGuidanceDisplay";
 
 function CareerGuidance() {
   const router = useRouter();
@@ -29,12 +29,6 @@ function CareerGuidance() {
     otherDomain: "",
     race: "",
     skills: [],
-  });
-
-  const md = new MarkdownIt({
-    html: true,
-    linkify: true,
-    typographer: true,
   });
 
   // Fetch user data first
@@ -190,10 +184,10 @@ function CareerGuidance() {
 
   return (
     <ProtectedRoute>
-      <div className="min-h-screen bg-[#0D1117] text-gray-200 p-8">
+      <div className="min-h-screen bg-[#0D1117] text-gray-200 p-4 md:p-8">
         <div className="max-w-4xl mx-auto">
           <div className="flex items-center gap-3 mb-8">
-            <h1 className="text-4xl font-bold text-transparent bg-gradient-to-r from-rose-600 to-orange-500 bg-clip-text">
+            <h1 className="text-3xl md:text-4xl font-bold text-transparent bg-gradient-to-r from-rose-600 to-orange-500 bg-clip-text">
               Career Counselling
             </h1>
           </div>
@@ -334,29 +328,27 @@ function CareerGuidance() {
           )}
 
           {!showSkillForm && (
-            <div className="bg-[#161B22] rounded-lg p-6 shadow-xl border border-orange-600">
-              <h2 className="text-xl font-semibold mb-4 text-gray-100">
-                Professional Guidance
-              </h2>
-              <div className="prose prose-invert max-w-none">
-                {loading ? (
-                  <div className="flex items-center justify-center py-8">
-                    <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-rose-600" />
-                  </div>
-                ) : counsellingText ? (
-                  <div
-                    className="text-gray-300 leading-relaxed"
-                    dangerouslySetInnerHTML={{
-                      __html: md.render(counsellingText),
-                    }}
-                  />
-                ) : (
+            <div>
+              {loading ? (
+                <div className="flex flex-col items-center justify-center py-16 bg-[#161B22] rounded-lg border border-orange-600">
+                  <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-rose-600 mb-4" />
+                  <p className="text-gray-400">
+                    Generating your personalized career guidance...
+                  </p>
+                </div>
+              ) : counsellingText ? (
+                <CareerGuidanceDisplay guidance={counsellingText} />
+              ) : (
+                <div className="bg-[#161B22] rounded-lg p-6 shadow-xl border border-orange-600">
+                  <h2 className="text-xl font-semibold mb-4 text-gray-100">
+                    Professional Guidance
+                  </h2>
                   <p className="text-gray-300">
                     Your career guidance will appear here once all requirements
                     are met.
                   </p>
-                )}
-              </div>
+                </div>
+              )}
             </div>
           )}
         </div>
