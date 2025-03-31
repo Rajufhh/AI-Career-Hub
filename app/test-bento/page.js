@@ -71,7 +71,7 @@ const BentoGrid = () => {
   ];
 
   return (
-    <div className="bg-[#0D1117] text-white min-h-screen p-4 md:p-6 mt-12">
+    <div className="bg-[#0D1117] text-white min-h-screen p-4 md:p-6">
       <div className="max-w-7xl mx-auto">
         <h1 className="text-center text-3xl md:text-4xl lg:text-5xl font-bold mb-8 pb-4 bg-gradient-to-r from-[#E31D65] to-[#FF6B2B] bg-clip-text text-transparent">
           Power Your Career Journey
@@ -81,12 +81,8 @@ const BentoGrid = () => {
           {features.map((feature) => (
             <div
               key={feature.id}
-              className={`bg-[#161B22] rounded-2xl p-4 md:p-6 flex flex-col relative transform transition-all duration-300 hover:-translate-y-1 ${feature.gridClass} hover:shadow-lg hover:shadow-pink-500/30 group overflow-hidden`}
+              className={`bg-[#161B22] rounded-2xl p-4 md:p-6 flex flex-col relative transform transition-transform duration-300 hover:-translate-y-1 ${feature.gridClass}`}
             >
-              {/* Thick gradient border effect on hover */}
-              <div className="absolute inset-0 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-300 bg-gradient-to-r from-[#E31D65] to-[#FF6B2B] p-[4px] -m-[4px] pointer-events-none"></div>
-              <div className="absolute inset-0 rounded-2xl bg-[#161B22] m-[3px]"></div>
-              
               <span className="absolute top-4 right-4 bg-gradient-to-r from-[#E31D65] to-[#FF6B2B] text-xs font-semibold py-1 px-3 rounded-full z-10">
                 {feature.deviceType}
               </span>

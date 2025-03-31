@@ -2,7 +2,7 @@ import Link from "next/link";
 
 export default function CTA() {
   return (
-    <section className="bg-[#0D1116] py-20">
+    <section className="bg-[#161B22] py-20">
       <div className="container mx-auto px-6 py-12 text-center">
         <h2 className="text-4xl font-bold bg-gradient-to-r from-[#E31D65] to-[#FF6B2B] text-transparent bg-clip-text mb-10">
           Ready to Start Your Journey?
