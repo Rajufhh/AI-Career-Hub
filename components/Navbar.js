@@ -2,10 +2,11 @@
 import { useSession, signIn, signOut } from "next-auth/react";
 import Link from "next/link";
 import { useRouter, usePathname } from "next/navigation";
-import { useState } from "react";
-import { Menu } from "lucide-react";
+import { useState, useRef, useEffect } from "react";
+import { Menu, ChevronDown } from "lucide-react";
 import Image from "next/image";
 import { Brain } from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";
 
 export function Navbar() {
   const { data: session } = useSession();
@@ -13,6 +14,21 @@ export function Navbar() {
   const pathname = usePathname();
   const [isLoggingOut, setIsLoggingOut] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [isJobDropdownOpen, setIsJobDropdownOpen] = useState(false);
+  const dropdownRef = useRef(null);
+
+  // Close dropdown when clicking outside
+  useEffect(() => {
+    function handleClickOutside(event) {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
+        setIsJobDropdownOpen(false);
+      }
+    }
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, []);
 
   const handleSignOut = async () => {
     if (pathname.includes("/assessments")) {
@@ -44,9 +60,18 @@ export function Navbar() {
     setIsMobileMenuOpen(!isMobileMenuOpen);
   };
 
+  const handleNavigation = (path) => {
+    if (session) {
+      router.push(path);
+    } else {
+      router.push("/auth/signin");
+    }
+    setIsMobileMenuOpen(false);
+  };
+
   if (isLoggingOut) {
     return (
-      <nav className="bg-dark-lighter bg-opacity-90 backdrop-blur-sm fixed top-0 left-0 right-0 z-50">
+      <nav className="bg-black fixed top-0 left-0 right-0 z-50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-16">
             <div className="flex items-center">
@@ -63,7 +88,7 @@ export function Navbar() {
   }
 
   return (
-    <nav className="bg-dark-lighter bg-opacity-20 backdrop-blur-sm top-0 left-0 right-0 z-50 shadow-md">
+    <nav className="bg-black shadow-md top-0 left-0 right-0 z-50">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-16">
           <div className="flex items-center">
@@ -73,50 +98,89 @@ export function Navbar() {
             </Link>
           </div>
 
-          {session && (
-            <>
-              {/* Desktop Menu */}
-              <div className="hidden md:block">
-                <div className="ml-10 flex items-baseline space-x-4">
-                  <Link
-                    href="/dashboard"
-                    className="text-gray-300 hover:bg-dark hover:text-white px-3 py-2 rounded-md text-base font-medium transition-colors duration-200"
-                  >
-                    Dashboard
-                  </Link>
-                  <Link
-                    href="/resume-analyze"
-                    className="text-gray-300 hover:bg-dark hover:text-white px-3 py-2 rounded-md text-base font-medium transition-colors duration-200"
-                  >
-                    Resume Analysis
-                  </Link>
-                  <Link
-                    href="/counseling"
-                    className="text-gray-300 hover:bg-dark hover:text-white px-3 py-2 rounded-md text-base font-medium transition-colors duration-200"
-                  >
-                    Career Counseling
-                  </Link>
-                  <Link
-                    href="/cover-letter"
-                    className="text-gray-300 hover:bg-dark hover:text-white px-3 py-2 rounded-md text-base font-medium transition-colors duration-200"
-                  >
-                    Cover Letter
-                  </Link>
-                </div>
-              </div>
-
-              {/* Mobile Menu Button - Centered positioning */}
-              <div className="flex-1 flex justify-center md:hidden">
-                <button
-                  onClick={toggleMobileMenu}
-                  className="text-gray-300 hover:text-white p-2"
-                  aria-label="Toggle menu"
+          {/* Desktop Menu - Always visible */}
+          <div className="hidden md:block">
+            <div className="ml-10 flex items-baseline space-x-4">
+              {session && (
+                <Link
+                  href="/dashboard"
+                  className="text-gray-300 hover:bg-gray-900 hover:text-white px-3 py-2 rounded-md text-base font-medium transition-colors duration-200"
                 >
-                  <Menu size={24} />
+                  Dashboard
+                </Link>
+              )}
+              <Link
+                href="/beginners"
+                className="text-gray-300 hover:bg-gray-900 hover:text-white px-3 py-2 rounded-md text-base font-medium transition-colors duration-200"
+              >
+                Beginners
+              </Link>
+              <button
+                onClick={() => handleNavigation("/counseling")}
+                className="text-gray-300 hover:bg-gray-900 hover:text-white px-3 py-2 rounded-md text-base font-medium transition-colors duration-200"
+              >
+                Career Counseling
+              </button>
+              <button
+                onClick={() => handleNavigation("/interview-landing")}
+                className="text-gray-300 hover:bg-gray-900 hover:text-white px-3 py-2 rounded-md text-base font-medium transition-colors duration-200"
+              >
+                Interviewer
+              </button>
+              <div
+                className="relative"
+                ref={dropdownRef}
+                onMouseEnter={() => setIsJobDropdownOpen(true)}
+                onMouseLeave={() => setIsJobDropdownOpen(false)}
+              >
+                <button className="text-gray-300 hover:bg-gray-900 hover:text-white px-3 py-2 rounded-md text-base font-medium transition-colors duration-200 flex items-center">
+                  Job Specific
+                  <ChevronDown className="ml-1 h-4 w-4" />
                 </button>
+                <AnimatePresence>
+                  {isJobDropdownOpen && (
+                    <motion.div
+                      initial={{ opacity: 0, y: -5 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      exit={{ opacity: 0, y: -5 }}
+                      transition={{ duration: 0.2 }}
+                      className="absolute left-0 mt-2 w-48 rounded-md shadow-lg bg-black py-1 z-10"
+                    >
+                      <button
+                        onClick={() => handleNavigation("/resume-analyze")}
+                        className="block px-4 py-2 text-sm text-gray-300 hover:bg-gray-900 hover:text-white w-full text-center"
+                      >
+                        Resume Analysis
+                      </button>
+                      <button
+                        onClick={() => handleNavigation("/cover-letter")}
+                        className="block px-4 py-2 text-sm text-gray-300 hover:bg-gray-900 hover:text-white w-full text-center"
+                      >
+                        Cover Letter
+                      </button>
+                      <button
+                        onClick={() => handleNavigation("/job-scraper")}
+                        className="block px-4 py-2 text-sm text-gray-300 hover:bg-gray-900 hover:text-white w-full text-center"
+                      >
+                        Job Scraper
+                      </button>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
               </div>
-            </>
-          )}
+            </div>
+          </div>
+
+          {/* Mobile Menu Button */}
+          <div className="md:hidden flex-1 flex justify-center">
+            <button
+              onClick={toggleMobileMenu}
+              className="text-gray-300 hover:text-white p-2"
+              aria-label="Toggle menu"
+            >
+              <Menu size={24} />
+            </button>
+          </div>
 
           <div className="flex items-center">
             {session ? (
@@ -128,7 +192,7 @@ export function Navbar() {
                       : "/complete-profile"
                   }
                 >
-                  <button className="text-gray-300 hover:text-white p-1 rounded-full hover:bg-dark transition-colors duration-200">
+                  <button className="text-gray-300 hover:text-white p-1 rounded-full hover:bg-gray-900 transition-colors duration-200">
                     <img
                       src={session.user.image}
                       alt="Profile"
@@ -156,40 +220,71 @@ export function Navbar() {
         </div>
 
         {/* Mobile Menu Dropdown */}
-        {session && isMobileMenuOpen && (
-          <div className="md:hidden">
-            <div className="px-2 pt-2 pb-3 space-y-1 bg-dark-lighter">
-              <Link
-                href="/dashboard"
-                className="text-gray-300 hover:bg-dark hover:text-white block px-3 py-2 rounded-md text-base font-medium transition-colors duration-200"
-                onClick={() => setIsMobileMenuOpen(false)}
-              >
-                Dashboard
-              </Link>
-              <Link
-                href="/resume-analyze"
-                className="text-gray-300 hover:bg-dark hover:text-white block px-3 py-2 rounded-md text-base font-medium transition-colors duration-200"
-                onClick={() => setIsMobileMenuOpen(false)}
-              >
-                Resume Analysis
-              </Link>
-              <Link
-                href="/counseling"
-                className="text-gray-300 hover:bg-dark hover:text-white block px-3 py-2 rounded-md text-base font-medium transition-colors duration-200"
-                onClick={() => setIsMobileMenuOpen(false)}
-              >
-                Career Counseling
-              </Link>
-              <Link
-                href="/cover-letter"
-                className="text-gray-300 hover:bg-dark hover:text-white block px-3 py-2 rounded-md text-base font-medium transition-colors duration-200"
-                onClick={() => setIsMobileMenuOpen(false)}
-              >
-                Cover Letter
-              </Link>
-            </div>
-          </div>
-        )}
+        <AnimatePresence>
+          {isMobileMenuOpen && (
+            <motion.div
+              initial={{ opacity: 0, height: 0 }}
+              animate={{ opacity: 1, height: "auto" }}
+              exit={{ opacity: 0, height: 0 }}
+              transition={{ duration: 0.3 }}
+              className="md:hidden"
+            >
+              <div className="px-2 pt-2 pb-3 space-y-1 bg-black">
+                {session && (
+                  <Link
+                    href="/dashboard"
+                    className="text-gray-300 hover:bg-gray-900 hover:text-white block px-3 py-2 rounded-md text-base font-medium transition-colors duration-200"
+                    onClick={() => setIsMobileMenuOpen(false)}
+                  >
+                    Dashboard
+                  </Link>
+                )}
+                <Link
+                  href="/beginners"
+                  className="text-gray-300 hover:bg-gray-900 hover:text-white block px-3 py-2 rounded-md text-base font-medium transition-colors duration-200"
+                  onClick={() => setIsMobileMenuOpen(false)}
+                >
+                  Beginners
+                </Link>
+                <button
+                  onClick={() => handleNavigation("/counseling")}
+                  className="text-gray-300 hover:bg-gray-900 hover:text-white block px-3 py-2 rounded-md text-base font-medium transition-colors duration-200 w-full text-left"
+                >
+                  Career Counseling
+                </button>
+                <button
+                  onClick={() => handleNavigation("/interview-landing")}
+                  className="text-gray-300 hover:bg-gray-900 hover:text-white block px-3 py-2 rounded-md text-base font-medium transition-colors duration-200 w-full text-left"
+                >
+                  Interviewer
+                </button>
+                <div className="text-gray-300 px-3 py-2 rounded-md text-base font-medium">
+                  Job Specific:
+                </div>
+                <div className="pl-4">
+                  <button
+                    onClick={() => handleNavigation("/resume-analyze")}
+                    className="text-gray-300 hover:bg-gray-900 hover:text-white block px-3 py-2 rounded-md text-sm font-medium transition-colors duration-200 w-full text-center"
+                  >
+                    Resume Analysis
+                  </button>
+                  <button
+                    onClick={() => handleNavigation("/cover-letter")}
+                    className="text-gray-300 hover:bg-gray-900 hover:text-white block px-3 py-2 rounded-md text-sm font-medium transition-colors duration-200 w-full text-center"
+                  >
+                    Cover Letter
+                  </button>
+                  <button
+                    onClick={() => handleNavigation("/job-scraper")}
+                    className="text-gray-300 hover:bg-gray-900 hover:text-white block px-3 py-2 rounded-md text-sm font-medium transition-colors duration-200 w-full text-center"
+                  >
+                    Job Scraper
+                  </button>
+                </div>
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
       </div>
     </nav>
   );
