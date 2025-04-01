@@ -12,10 +12,11 @@ export default function Hero() {
         <div className="flex flex-col lg:flex-row items-center justify-between gap-12">
           <div className="lg:w-1/2">
             <h1 className="text-4xl sm:text-5xl md:text-6xl font-bold mb-6 bg-gradient-to-r from-[#E31D65] to-[#FF6B2B] text-transparent bg-clip-text">
-              Unlock Your Potential with AI-Powered Assessments
+              Unlock Your Potential with AI-Powered Career Counseling
             </h1>
             <p className="text-xl text-gray-300 mb-8">
-              Discover your strengths, improve your skills, and get personalized career guidance with our cutting-edge platform.
+              Discover your strengths, improve your skills, and get personalized
+              career guidance with our cutting-edge platform.
             </p>
           </div>
           <div className="lg:w-1/2">
