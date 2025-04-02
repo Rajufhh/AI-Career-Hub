@@ -212,27 +212,17 @@ const BentoGrid = () => {
                   feature.imageContainerClass
                 } justify-center items-center ${
                   feature.id === 1 ? "mt-0" : "mt-3"
-                } ${feature.id === 1 ? "gap-1" : "gap-24"} z-0`}
+                } ${feature.id === 1 ? "gap-1" : "gap-2"} z-0`} // Changed gap-24 to gap-4 for consistency
               >
                 {feature.images.map((image, index) => (
                   <div
                     key={index}
-                    className={`${
-                      feature.images.length > 1 ? "w-full" : "w-full"
-                    } h-auto flex justify-center items-center ${
-                      feature.id === 1 ? "py-0" : ""
-                    }`}
+                    className={`w-full h-auto flex justify-center items-center`} // Simplified class
                   >
                     <img
                       src={image.src}
                       alt={image.alt}
-                      className={`${
-                        feature.id === 1
-                          ? "max-w-[85%] max-h-[85%] rounded-xl shadow-lg object-contain" // Bigger size for Resume Analysis
-                          : feature.deviceType === "Mobile"
-                          ? "max-w-full max-h-full rounded-xl shadow-lg object-contain"
-                          : "max-w-full max-h-full rounded-lg shadow-lg object-cover"
-                      }`}
+                      className="max-w max-h rounded-xl shadow-lg object-contain" // Made consistent for all cards
                     />
                   </div>
                 ))}
