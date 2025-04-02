@@ -246,18 +246,40 @@ export function Navbar() {
                 >
                   Beginners
                 </Link>
-                <button
+
+                {session && (
+                <Link
+                  href="/counseling"
+                  className="text-gray-300 hover:bg-gray-900 hover:text-white block px-3 py-2 rounded-md text-base font-medium transition-colors duration-200"
+                  onClick={() => setIsMobileMenuOpen(false)}
+                >
+                  Career Counseling
+                </Link>
+                )}
+
+                {session && (
+                <Link
+                  href="/interview-landing"
+                  className="text-gray-300 hover:bg-gray-900 hover:text-white block px-3 py-2 rounded-md text-base font-medium transition-colors duration-200"
+                  onClick={() => setIsMobileMenuOpen(false)}
+                >
+                  Interviewer
+                </Link>
+                )}
+
+
+                {/* <button
                   onClick={() => handleNavigation("/counseling")}
                   className="text-gray-300 hover:bg-gray-900 hover:text-white block px-3 py-2 rounded-md text-base font-medium transition-colors duration-200 w-full text-left"
                 >
                   Career Counseling
-                </button>
-                <button
+                </button> */}
+                {/* <button
                   onClick={() => handleNavigation("/interview-landing")}
                   className="text-gray-300 hover:bg-gray-900 hover:text-white block px-3 py-2 rounded-md text-base font-medium transition-colors duration-200 w-full text-left"
                 >
                   Interviewer
-                </button>
+                </button> */}
                 <div className="text-gray-300 px-3 py-2 rounded-md text-base font-medium">
                   Job Specific:
                 </div>
