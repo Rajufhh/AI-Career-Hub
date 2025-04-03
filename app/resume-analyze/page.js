@@ -3,9 +3,11 @@
 import { useState } from "react";
 import { FileUp } from "lucide-react";
 import { ProtectedRoute } from "@/services/routeProtectionService";
-import ChatbotController from '@/components/ChatbotController';
+import ChatbotController from "@/components/ChatbotController";
+import { useRouter } from "next/navigation";
 
 export default function Home() {
+  const router = useRouter();
   const [jobDescription, setJobDescription] = useState("");
   const [file, setFile] = useState(null);
   const [loading, setLoading] = useState(false);
@@ -109,6 +111,16 @@ export default function Home() {
                 className="font-mono text-sm text-gray-300"
                 dangerouslySetInnerHTML={{ __html: analysis }}
               />
+
+              {/* Added button to navigate to cover letter generator */}
+              <div className="mt-6">
+                <button
+                  onClick={() => router.push("/cover-letter")}
+                  className="w-full py-3 bg-gradient-to-r from-[#E31D65] to-[#FF6B2B] hover:opacity-90 duration-200 rounded-lg font-semibold"
+                >
+                  Generate a Cover Letter Based on Your Resume
+                </button>
+              </div>
             </div>
           )}
         </div>

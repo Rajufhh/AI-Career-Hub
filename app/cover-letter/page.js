@@ -218,6 +218,16 @@ export default function CoverLetterGenerator() {
             <pre className="text-white whitespace-pre-wrap font-mono text-sm">
               {coverLetter.toString()}
             </pre>
+
+            {/* Added button to navigate to interview landing */}
+            <div className="mt-6">
+              <button
+                onClick={() => (window.location.href = "/interview-landing")}
+                className="w-full py-3 bg-gradient-to-r from-[#E31D65] to-[#FF6B2B] hover:opacity-90 duration-200 rounded-lg font-semibold"
+              >
+                Try Our AI Interviewer to Practice
+              </button>
+            </div>
           </div>
         )}
       </div>

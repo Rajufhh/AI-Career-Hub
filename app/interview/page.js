@@ -387,6 +387,16 @@ const Interview = () => {
             </button>
           </div>
 
+          {/* Added button to navigate to job scraper */}
+          <div className="mt-4">
+            <button
+              onClick={() => (window.location.href = "/job-scraper")}
+              className="w-full px-4 py-2 bg-gradient-to-r from-[#E31D65] to-[#FF6B2B] text-white rounded-lg hover:opacity-90"
+            >
+              Find Job Opportunities
+            </button>
+          </div>
+
           {warning && (
             <div className="mt-4 p-4 bg-yellow-500 bg-opacity-20 rounded-lg text-yellow-300">
               {warning}

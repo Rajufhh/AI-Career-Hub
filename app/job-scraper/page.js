@@ -260,6 +260,22 @@ export default function JobScraper() {
                 </tbody>
               </table>
             </div>
+
+            {/* Added buttons for resume analysis and cover letter */}
+            <div className="mt-6 grid grid-cols-1 md:grid-cols-2 gap-4">
+              <button
+                onClick={() => (window.location.href = "/resume-analyze")}
+                className="py-3 bg-gradient-to-r from-[#E31D65] to-[#FF6B2B] hover:opacity-90 duration-200 rounded-lg font-semibold"
+              >
+                Analyze Your Resume for These Jobs
+              </button>
+              <button
+                onClick={() => (window.location.href = "/cover-letter")}
+                className="py-3 bg-gradient-to-r from-[#E31D65] to-[#FF6B2B] hover:opacity-90 duration-200 rounded-lg font-semibold"
+              >
+                Generate a Cover Letter
+              </button>
+            </div>
           </div>
         )}
       </div>

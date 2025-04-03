@@ -731,6 +731,16 @@ function BeginnerAssessment() {
               Go to Dashboard
             </button>
           </div>
+
+          {/* Added button for detailed analysis */}
+          <div className="mt-4">
+            <button
+              onClick={() => (window.location.href = "/auth/signin")}
+              className="w-full px-4 py-2 bg-gradient-to-r from-[#E31D65] to-[#FF6B2B] text-white rounded-lg hover:opacity-90"
+            >
+              Get Detailed Analysis
+            </button>
+          </div>
         </div>
       </div>
     );
