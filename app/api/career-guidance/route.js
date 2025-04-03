@@ -23,6 +23,17 @@ export async function GET() {
       return NextResponse.json({ error: "User not found" }, { status: 404 });
     }
 
+    // Check if username exists
+    if (!user.username) {
+      return NextResponse.json(
+        {
+          error:
+            "Please complete your basic profile before requesting career guidance",
+        },
+        { status: 400 }
+      );
+    }
+
     // If career guidance already exists, return it
     if (user.careerGuidance) {
       return NextResponse.json({ guidance: user.careerGuidance });
@@ -48,7 +59,6 @@ export async function GET() {
       .map((score) => `${score.skill}: ${score.score}/100`)
       .join("\n");
 
-    console.log("userr", user.username);
     // Create prompt for Gemini
     const prompt = `Act as a career counselor with extensive experience in technology and professional development.
 
@@ -109,7 +119,6 @@ Please provide detailed, actionable insights that take into account the individu
     const guidance = result.response.text();
 
     // Save guidance to database
-    console.log("savingg");
     try {
       user.careerGuidance = guidance;
       await user.save();

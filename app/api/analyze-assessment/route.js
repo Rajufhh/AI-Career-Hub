@@ -123,7 +123,6 @@ Ensure the analysis presents balanced options without being overly prescriptive.
       return NextResponse.json({ results: reformattedResults });
     } catch (parseError) {
       console.error("Failed to parse Gemini response:", parseError);
-      console.log("Raw response:", analysisResponse);
       return NextResponse.json(
         { error: "Invalid response format from AI", raw: analysisResponse },
         { status: 500 }

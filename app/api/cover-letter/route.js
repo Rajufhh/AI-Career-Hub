@@ -28,7 +28,6 @@ async function uploadToGemini(buffer, mimeType, filename) {
   // Delete temp file
   await fs.unlink(tempFilePath);
   const file = uploadResult.file;
-  //   console.log(Uploaded file ${file.displayName} as: ${file.name});
   return file;
 }
 
@@ -36,7 +35,6 @@ async function uploadToGemini(buffer, mimeType, filename) {
  * Waits for the given files to be active.
  */
 async function waitForFilesActive(files) {
-  console.log("Waiting for file processing...");
   for (const name of files.map((file) => file.name)) {
     let file = await fileManager.getFile(name);
     while (file.state === "PROCESSING") {
@@ -51,7 +49,6 @@ async function waitForFilesActive(files) {
       throw new Error(`File ${file.name} failed to process`);
     }
   }
-  console.log("...all files ready\n");
 }
 
 /**

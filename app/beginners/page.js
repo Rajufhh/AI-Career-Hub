@@ -17,6 +17,7 @@ import {
   Coffee,
   Gift,
   Briefcase,
+  Download, // Add this import
 } from "lucide-react";
 
 const md = new MarkdownIt();
@@ -118,7 +119,12 @@ const LoadingState = ({ message = "Loading..." }) => (
 );
 
 // This is the client component that uses useSearchParams
+// First, import useSession from next-auth/react at the top of the file
+import { useSession } from "next-auth/react";
+
+// Then in the BeginnerAssessment component, add the session check
 function BeginnerAssessment() {
+  const { data: session } = useSession();
   const searchParams = useSearchParams();
   const initialDomain = searchParams.get("domain");
 
@@ -567,13 +573,64 @@ function BeginnerAssessment() {
   }
 
   // Step 4: Results
+  // Add this function for downloading results
+  const handleDownload = async () => {
+    try {
+      setLoading(true);
+      setLoadingMessage("Preparing your assessment PDF...");
+
+      const response = await fetch("/api/download-beginner-guidance", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          results,
+          selectedDomain:
+            CAREER_DOMAINS.find((d) => d.id === selectedDomain)?.name ||
+            selectedDomain,
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error("Download failed");
+      }
+
+      const blob = await response.blob();
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = `Career_Assessment_Results.pdf`;
+
+      document.body.appendChild(a);
+      a.click();
+      window.URL.revokeObjectURL(url);
+      document.body.removeChild(a);
+    } catch (err) {
+      setError("Failed to download assessment results. Please try again.");
+      console.error(err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // In the Step 4: Results section, modify the button section to include the download button:
   if (step === 4 && results) {
     return (
       <div className="min-h-screen bg-[#0D1117] flex flex-col items-center justify-center p-8">
         <div className="max-w-3xl w-full bg-[#161B22] rounded-lg shadow-lg p-6">
-          <h2 className="text-2xl font-bold text-white mb-4">
-            Your Career Assessment Results
-          </h2>
+          <div className="flex justify-between items-center mb-4">
+            <h2 className="text-2xl font-bold text-white">
+              Your Career Assessment Results
+            </h2>
+            <button
+              onClick={handleDownload}
+              className="flex items-center px-4 py-2 bg-gradient-to-r from-[#E31D65] to-[#FF6B2B] hover:opacity-90 duration-200 rounded-lg"
+            >
+              <Download className="mr-2" size={16} />
+              Download PDF
+            </button>
+          </div>
 
           <div className="p-4 bg-gradient-to-r from-[#21262D] to-[#30363D] rounded-lg mb-6">
             <div className="text-white text-lg font-medium mb-2">
@@ -653,70 +710,6 @@ function BeginnerAssessment() {
             </ol>
           </div>
 
-          {/* Feedback Form */}
-          {showFeedback && (
-            <div className="p-4 rounded-lg bg-[#21262D] border border-[#30363D] mb-6">
-              <h3 className="text-lg font-semibold text-white mb-3">
-                How was your assessment experience?
-              </h3>
-
-              {!feedbackSubmitted ? (
-                <>
-                  <div className="flex items-center justify-center gap-2 mb-4">
-                    {[1, 2, 3, 4, 5].map((star) => (
-                      <button
-                        key={star}
-                        onClick={() => handleStarClick(star)}
-                        className="focus:outline-none"
-                      >
-                        <Star
-                          className={`w-8 h-8 ${
-                            feedbackStars >= star
-                              ? "text-yellow-400 fill-yellow-400"
-                              : "text-gray-500"
-                          } transition-colors duration-200 hover:text-yellow-300`}
-                        />
-                      </button>
-                    ))}
-                  </div>
-
-                  <div className="mb-4">
-                    <textarea
-                      className="w-full p-2 border border-gray-300 rounded-md bg-[#161B22] text-white"
-                      placeholder="Write your feedback..."
-                      value={feedbackComment}
-                      onChange={(e) => setFeedbackComment(e.target.value)}
-                    />
-                  </div>
-
-                  <button
-                    onClick={submitFeedback}
-                    disabled={feedbackStars === 0 || isSubmittingFeedback}
-                    className={`w-full px-4 py-2 rounded-lg text-white font-medium transition-all duration-200 ${
-                      feedbackStars > 0 && !isSubmittingFeedback
-                        ? "bg-gradient-to-r from-[#E31D65] to-[#FF6B2B] hover:opacity-90"
-                        : "bg-gray-500 cursor-not-allowed"
-                    }`}
-                  >
-                    {isSubmittingFeedback ? (
-                      <div className="flex items-center justify-center">
-                        <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                        Submitting...
-                      </div>
-                    ) : (
-                      "Submit Feedback"
-                    )}
-                  </button>
-                </>
-              ) : (
-                <div className="text-center p-2 text-green-400">
-                  <CheckCircle className="w-6 h-6 mx-auto mb-2" />
-                  Thank you for your feedback!
-                </div>
-              )}
-            </div>
-          )}
-
           <div className="flex gap-4 mt-6">
             <button
               onClick={handleRestart}
@@ -732,15 +725,17 @@ function BeginnerAssessment() {
             </button>
           </div>
 
-          {/* Added button for detailed analysis */}
-          <div className="mt-4">
-            <button
-              onClick={() => (window.location.href = "/auth/signin")}
-              className="w-full px-4 py-2 bg-gradient-to-r from-[#E31D65] to-[#FF6B2B] text-white rounded-lg hover:opacity-90"
-            >
-              Get Detailed Analysis
-            </button>
-          </div>
+          {/* Only show the detailed analysis button if user is not logged in */}
+          {!session && (
+            <div className="mt-4">
+              <button
+                onClick={() => (window.location.href = "/auth/signin")}
+                className="w-full px-4 py-2 bg-gradient-to-r from-[#E31D65] to-[#FF6B2B] text-white rounded-lg hover:opacity-90"
+              >
+                Get Detailed Analysis
+              </button>
+            </div>
+          )}
         </div>
       </div>
     );

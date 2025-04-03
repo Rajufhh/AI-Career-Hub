@@ -50,6 +50,15 @@ function CareerGuidance() {
         const data = await response.json();
         setUserData(data);
 
+        // Check if username exists
+        if (!data.username) {
+          setError(
+            "Please complete your basic profile before requesting career guidance"
+          );
+          setLoading(false);
+          return;
+        }
+
         // Initialize form with existing data if any
         if (data) {
           setFormData({
@@ -323,6 +332,14 @@ function CareerGuidance() {
                   className="mt-3 px-4 py-2 bg-gradient-to-r from-[#E31D65] to-[#FF6B2B] text-white rounded-lg hover:opacity-90"
                 >
                   Go to Profile
+                </button>
+              )}
+              {error.includes("complete your basic profile") && (
+                <button
+                  onClick={() => router.push("/complete-profile")}
+                  className="mt-3 px-4 py-2 bg-gradient-to-r from-[#E31D65] to-[#FF6B2B] text-white rounded-lg hover:opacity-90"
+                >
+                  Complete Your Profile
                 </button>
               )}
             </div>

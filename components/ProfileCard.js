@@ -1,6 +1,6 @@
 "use client";
 
-import { useRouter } from 'next/navigation';
+import { useRouter } from "next/navigation";
 import { Button } from "./ui/button";
 import { Badge } from "./ui/badge";
 import { MapPin, Briefcase, Award, ChevronRight } from "lucide-react";
@@ -14,12 +14,10 @@ export default function ProfileCard({ profile }) {
 
   const handleTakeAssessment = (skillId) => {
     // Find the skill name from the ID
-    const skill = profile.skills.find(s => s.id === skillId);
+    const skill = profile.skills.find((s) => s.id === skillId);
     if (skill) {
-      console.log('Navigating to assessment for:', skill.name); // Debug log
       router.push(`/assessments?skill=${encodeURIComponent(skill.name)}`);
     }
-
   };
 
   return (
