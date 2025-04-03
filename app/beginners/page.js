@@ -614,8 +614,87 @@ function BeginnerAssessment() {
     }
   };
 
-  // In the Step 4: Results section, modify the button section to include the download button:
+  // In the Step 4: Results section, update the feedback section with the new component
   if (step === 4 && results) {
+    // Create the FeedbackForm component inside this scope to access the state variables
+    const FeedbackForm = () => {
+      const inputRef = React.useRef(null);
+      const typingTimeoutRef = React.useRef(null);
+
+      const handleInputChange = () => {
+        if (typingTimeoutRef.current) {
+          clearTimeout(typingTimeoutRef.current);
+        }
+
+        typingTimeoutRef.current = setTimeout(() => {
+          setFeedbackComment(inputRef.current.value);
+        }, 3500); // Update state after 3500ms (user stops typing)
+      };
+
+      return (
+        <div className="mt-8 p-4 rounded-lg bg-[#21262D] border border-[#30363D]">
+          <h3 className="text-lg font-semibold text-white mb-3">
+            How was your assessment experience?
+          </h3>
+
+          {!feedbackSubmitted ? (
+            <>
+              <div className="flex items-center justify-center gap-2 mb-4">
+                {[1, 2, 3, 4, 5].map((star) => (
+                  <button
+                    key={star}
+                    onClick={() => handleStarClick(star)}
+                    className="focus:outline-none"
+                  >
+                    <Star
+                      className={`w-8 h-8 ${
+                        feedbackStars >= star
+                          ? "text-yellow-400 fill-yellow-400"
+                          : "text-gray-500"
+                      } transition-colors duration-200 hover:text-yellow-300`}
+                    />
+                  </button>
+                ))}
+              </div>
+
+              <div className="mb-4">
+                <textarea
+                  className="w-full p-2 border border-gray-300 rounded-md bg-[#161B22] text-white"
+                  ref={inputRef}
+                  placeholder="Write your feedback..."
+                  onInput={handleInputChange}
+                />
+              </div>
+
+              <button
+                onClick={submitFeedback}
+                disabled={feedbackStars === 0 || isSubmittingFeedback}
+                className={`w-full px-4 py-2 rounded-lg text-white font-medium transition-all duration-200 ${
+                  feedbackStars > 0 && !isSubmittingFeedback
+                    ? "bg-gradient-to-r from-[#E31D65] to-[#FF6B2B] hover:opacity-90"
+                    : "bg-gray-500 cursor-not-allowed"
+                }`}
+              >
+                {isSubmittingFeedback ? (
+                  <div className="flex items-center justify-center">
+                    <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                    Submitting...
+                  </div>
+                ) : (
+                  "Submit Feedback"
+                )}
+              </button>
+            </>
+          ) : (
+            <div className="text-center p-2 text-green-400">
+              <CheckCircle className="w-6 h-6 mx-auto mb-2" />
+              Thank you for your feedback!
+            </div>
+          )}
+        </div>
+      );
+    };
+
     return (
       <div className="min-h-screen bg-[#0D1117] flex flex-col items-center justify-center p-8">
         <div className="max-w-3xl w-full bg-[#161B22] rounded-lg shadow-lg p-6">
@@ -709,6 +788,61 @@ function BeginnerAssessment() {
               ))}
             </ol>
           </div>
+
+          {/* Feedback section */}
+          {showFeedback && !feedbackSubmitted && (
+            <div className="bg-[#21262D] p-4 rounded-lg mb-6 text-center">
+              <h3 className="text-lg font-semibold text-white mb-3">
+                How was your experience?
+              </h3>
+              <div className="flex items-center justify-center mb-4">
+                {[1, 2, 3, 4, 5].map((star) => (
+                  <button
+                    key={star}
+                    onClick={() => handleStarClick(star)}
+                    className="mr-2 focus:outline-none"
+                  >
+                    <Star
+                      className={`w-6 h-6 ${
+                        feedbackStars >= star
+                          ? "text-yellow-400 fill-yellow-400"
+                          : "text-gray-400"
+                      }`}
+                    />
+                  </button>
+                ))}
+              </div>
+              <textarea
+                value={feedbackComment}
+                onChange={(e) => setFeedbackComment(e.target.value)}
+                placeholder="Share your thoughts about this assessment (optional)"
+                className="w-full p-3 bg-[#0D1117] text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-[#E31D65] mb-4"
+                rows={3}
+              />
+              <button
+                onClick={submitFeedback}
+                disabled={feedbackStars === 0 || isSubmittingFeedback}
+                className={`px-4 py-2 rounded-lg text-white ${
+                  feedbackStars === 0
+                    ? "bg-gray-500 cursor-not-allowed"
+                    : "bg-gradient-to-r from-[#E31D65] to-[#FF6B2B] hover:opacity-90"
+                }`}
+              >
+                {isSubmittingFeedback ? (
+                  <Loader2 className="w-5 h-5 animate-spin mx-auto" />
+                ) : (
+                  "Submit Feedback"
+                )}
+              </button>
+            </div>
+          )}
+
+          {feedbackSubmitted && (
+            <div className="bg-[#21262D] p-4 rounded-lg mb-6 text-center">
+              <CheckCircle className="w-8 h-8 text-green-400 mx-auto mb-2" />
+              <p className="text-white">Thank you for your feedback!</p>
+            </div>
+          )}
 
           <div className="flex gap-4 mt-6">
             <button
