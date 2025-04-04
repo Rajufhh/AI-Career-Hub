@@ -68,7 +68,6 @@ Domain of Interest: ${user.domain}${
       user.otherDomain ? ` (${user.otherDomain})` : ""
     }
 Gender: ${user.gender}
-Race: ${user.race}
 Country: ${user.country}
 State: ${user.state}
 

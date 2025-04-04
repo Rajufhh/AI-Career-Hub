@@ -1,11 +1,11 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { useRouter } from 'next/navigation';
+import { useRouter } from "next/navigation";
 import { useSession } from "next-auth/react";
-import { ProtectedRoute } from '@/services/routeProtectionService';
+import { ProtectedRoute } from "@/services/routeProtectionService";
 import { MapPin, Book, Briefcase, ChevronRight, Trophy } from "lucide-react";
-import ChatbotController from '@/components/ChatbotController';
+import ChatbotController from "@/components/ChatbotController";
 
 export default function Profile() {
   const { data: session, status } = useSession();
@@ -25,30 +25,37 @@ export default function Profile() {
     async function fetchUserProfile() {
       if (session?.user?.email) {
         try {
-          const response = await fetch(`/api/get-user?email=${encodeURIComponent(session.user.email)}`);
+          const response = await fetch(
+            `/api/get-user?email=${encodeURIComponent(session.user.email)}`
+          );
           const data = await response.json();
 
           if (!response.ok) {
-            throw new Error(data.error || 'Error fetching profile');
+            throw new Error(data.error || "Error fetching profile");
           }
 
           // Transform the data to match your profile structure
           const transformedProfile = {
             id: data._id,
             username: data.username,
-            photoUrl: session.user.image || "https://www.gravatar.com/avatar/00000000000000000000000000000000?d=mp&f=y",
+            photoUrl:
+              session.user.image ||
+              "https://www.gravatar.com/avatar/00000000000000000000000000000000?d=mp&f=y",
             state: data.state,
             country: data.country,
             gender: data.gender,
-            race: data.race,
-            domain: data.domain === 'other' ? data.otherDomain : data.domain,
+            domain: data.domain === "other" ? data.otherDomain : data.domain,
             skills: data.skills.map((skill) => {
-              const skillScore = data.skillScores?.find(s => s.skill === skill);
+              const skillScore = data.skillScores?.find(
+                (s) => s.skill === skill
+              );
               return {
                 id: skill, // Using skill name as ID for simplicity
                 name: skill,
                 assessmentTaken: !!skillScore,
-                assessmentScore: skillScore ? Math.round(skillScore.score) : null
+                assessmentScore: skillScore
+                  ? Math.round(skillScore.score)
+                  : null,
               };
             }),
             careerPath: {
@@ -65,7 +72,7 @@ export default function Profile() {
 
           setProfile(transformedProfile);
         } catch (err) {
-          console.error('Error fetching profile:', err);
+          console.error("Error fetching profile:", err);
           setError(err.message);
         } finally {
           setLoading(false);
@@ -77,7 +84,7 @@ export default function Profile() {
   }, [session]);
 
   const handleTakeAssessment = (skillId) => {
-    const skill = profile?.skills.find(s => s.id === skillId);
+    const skill = profile?.skills.find((s) => s.id === skillId);
     if (skill) {
       router.push(`/assessments?skill=${encodeURIComponent(skill.name)}`);
     }
@@ -124,11 +131,15 @@ export default function Profile() {
                 className="w-24 h-24 rounded-full"
               />
               <div className="flex-1">
-                <h1 className="text-2xl font-bold text-white mb-2">{profile.username}</h1>
+                <h1 className="text-2xl font-bold text-white mb-2">
+                  {profile.username}
+                </h1>
                 <div className="flex items-center gap-4 text-gray-400">
                   <div className="flex items-center gap-1">
                     <MapPin className="w-4 h-4" />
-                    <span>{profile.state}, {profile.country}</span>
+                    <span>
+                      {profile.state}, {profile.country}
+                    </span>
                   </div>
                   <div className="flex items-center gap-1">
                     <Book className="w-4 h-4" />
@@ -142,7 +153,9 @@ export default function Profile() {
           {/* Skills Assessment Card */}
           <div className="bg-[#161B22] border border-[#30363D] rounded-lg p-6">
             <div className="flex items-center justify-between mb-6">
-              <h2 className="text-xl font-bold text-white">Skills Assessment</h2>
+              <h2 className="text-xl font-bold text-white">
+                Skills Assessment
+              </h2>
               <Trophy className="w-6 h-6 text-yellow-500" />
             </div>
             <div className="space-y-4">
@@ -184,7 +197,10 @@ export default function Profile() {
                 <h3 className="text-white font-medium mb-2">Next Steps</h3>
                 <div className="space-y-2">
                   {profile.careerPath.next.map((level, index) => (
-                    <div key={index} className="flex items-center text-gray-400">
+                    <div
+                      key={index}
+                      className="flex items-center text-gray-400"
+                    >
                       <ChevronRight className="w-4 h-4 mr-2" />
                       {level}
                     </div>
@@ -192,10 +208,15 @@ export default function Profile() {
                 </div>
               </div>
               <div className="p-4 bg-[#21262D] rounded-lg">
-                <h3 className="text-white font-medium mb-2">Recommended Roles</h3>
+                <h3 className="text-white font-medium mb-2">
+                  Recommended Roles
+                </h3>
                 <div className="space-y-2">
                   {profile.careerPath.recommended.map((role, index) => (
-                    <div key={index} className="flex items-center text-gray-400">
+                    <div
+                      key={index}
+                      className="flex items-center text-gray-400"
+                    >
                       <ChevronRight className="w-4 h-4 mr-2" />
                       {role}
                     </div>

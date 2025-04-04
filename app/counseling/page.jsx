@@ -15,20 +15,10 @@ function CareerGuidance() {
   const [showSkillForm, setShowSkillForm] = useState(false);
   const [skillInput, setSkillInput] = useState("");
   const [domains, setDomains] = useState(["web", "app", "blockchain", "other"]);
-  const [races, setRaces] = useState([
-    "American Indian or Alaska Native",
-    "Asian",
-    "Black or African American",
-    "Hispanic or Latino",
-    "Native Hawaiian or Other Pacific Islander",
-    "White",
-    "Two or More Races",
-  ]);
 
   const [formData, setFormData] = useState({
     domain: "",
     otherDomain: "",
-    race: "",
     skills: [],
   });
 
@@ -64,7 +54,6 @@ function CareerGuidance() {
           setFormData({
             domain: data.domain || "",
             otherDomain: data.otherDomain || "",
-            race: data.race || "",
             skills: data.skills || [],
           });
         }
@@ -73,8 +62,7 @@ function CareerGuidance() {
         const needsSkillForm =
           !data.skills ||
           data.skills.length === 0 ||
-          !data.domain ||
-          !data.race;
+          !data.domain
         setShowSkillForm(needsSkillForm);
 
         // If user has all skills and they have scores, try to fetch guidance
@@ -248,26 +236,6 @@ function CareerGuidance() {
                     />
                   </div>
                 )}
-
-                <div>
-                  <label className="block text-gray-400 mb-2">Race</label>
-                  <select
-                    name="race"
-                    value={formData.race}
-                    onChange={handleInputChange}
-                    className="w-full px-4 py-2 border border-gray-700 rounded-lg bg-[#161B22] text-white"
-                    required
-                  >
-                    <option value="" disabled hidden>
-                      Select your race
-                    </option>
-                    {races.map((race) => (
-                      <option key={race} value={race}>
-                        {race}
-                      </option>
-                    ))}
-                  </select>
-                </div>
 
                 <div>
                   <label className="block text-gray-400 mb-2">Skills</label>

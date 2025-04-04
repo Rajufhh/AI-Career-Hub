@@ -26,7 +26,6 @@ export async function POST(request) {
     if (data.domain) user.domain = data.domain;
     if (data.domain === "other" && data.otherDomain)
       user.otherDomain = data.otherDomain;
-    if (data.race) user.race = data.race;
 
     // Handle skills update
     if (data.skills && Array.isArray(data.skills)) {
@@ -45,7 +44,6 @@ export async function POST(request) {
         state: user.state,
         domain: user.domain,
         otherDomain: user.otherDomain,
-        race: user.race,
         skills: user.skills,
         skillScores: user.skillScores || [],
       },

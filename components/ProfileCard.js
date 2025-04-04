@@ -45,9 +45,6 @@ export default function ProfileCard({ profile }) {
                 {profile.gender}
               </Badge>
               <Badge className="bg-[#21262D] text-gray-300">
-                {profile.race}
-              </Badge>
-              <Badge className="bg-[#21262D] text-gray-300">
                 <Briefcase className="w-4 h-4 mr-1" />
                 {profile.domain}
               </Badge>

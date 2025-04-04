@@ -35,7 +35,6 @@ export async function GET(request) {
       state: user.state,
       domain: user.domain,
       otherDomain: user.otherDomain,
-      race: user.race,
       skills: user.skills,
       skillScores: user.skillScores || [],
       hasCareerGuidance: !!user.careerGuidance,

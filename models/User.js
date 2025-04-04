@@ -17,17 +17,6 @@ const UserSchema = z.object({
   state: z.string().min(2).trim(),
   domain: z.enum(["web", "app", "blockchain", "other"]).optional(),
   otherDomain: z.string().optional(),
-  race: z
-    .enum([
-      "American Indian or Alaska Native",
-      "Asian",
-      "Black or African American",
-      "Hispanic or Latino",
-      "Native Hawaiian or Other Pacific Islander",
-      "White",
-      "Two or More Races",
-    ])
-    .optional(),
   skills: z.array(SkillSchema).optional(),
   skillScores: z.array(SkillScoreSchema).optional(),
   careerGuidance: z.string().max(50000).optional(), // New field for career guidance
@@ -77,22 +66,6 @@ const mongooseUserSchema = new Schema(
         return this.domain === "other";
       },
       trim: true,
-    },
-    race: {
-      type: String,
-      required: false,
-      enum: {
-        values: [
-          "American Indian or Alaska Native",
-          "Asian",
-          "Black or African American",
-          "Hispanic or Latino",
-          "Native Hawaiian or Other Pacific Islander",
-          "White",
-          "Two or More Races",
-        ],
-        message: "{VALUE} is not a valid race option",
-      },
     },
     skills: {
       type: [String],
@@ -153,7 +126,6 @@ mongooseUserSchema.pre("save", async function (next) {
         state: this.state,
         domain: this.domain,
         otherDomain: this.otherDomain,
-        race: this.race,
         skills: this.skills || [],
         skillScores: this.skillScores,
         careerGuidance: this.careerGuidance,
