@@ -39,20 +39,9 @@ export default function CompleteProfile() {
           );
           const data = await response.json();
 
-          if (response.ok && data) {
-            setFormData({
-              username: data.username || "",
-              gender: data.gender || "",
-              country: data.country || "",
-              state: data.state || "",
-              mailId: data.mailId || session.user.email,
-            });
-
-            // If user data exists, redirect to profile page
-            if (data.username) {
-              router.push("/profile");
-              return;
-            }
+          if (data.username) {
+            router.push("/profile");
+            return;
           }
         } catch (error) {
           console.error("Error fetching user data:", error);
@@ -159,7 +148,7 @@ export default function CompleteProfile() {
       }
 
       alert("Basic profile completed successfully!");
-      router.push("/profile");
+      router.push("/dashboard");
     } catch (error) {
       console.error("Error:", error);
       setError(error.message);
