@@ -26,7 +26,7 @@ const BentoGrid = () => {
       description:
         "Get instant feedback on your resume with our AI-powered analysis tools.",
       tags: ["ATS Friendly", "Job Match", "Instant Feedback"],
-      deviceType: "Web",
+      deviceType: "Web Preview",
       images: [
         {
           src: "/images/resume-mobile.png",
@@ -44,7 +44,7 @@ const BentoGrid = () => {
       description:
         "Practice with our AI interviewer to prepare for tough questions and receive instant feedback.",
       tags: ["Video Interview", "Real-time Feedback", "Industry Specific"],
-      deviceType: "Web",
+      deviceType: "Web Preview",
       images: [
         {
           src: "/images/interview1-web.png",
@@ -66,7 +66,7 @@ const BentoGrid = () => {
       description:
         "Create personalized cover letters tailored to each job application in seconds.",
       tags: ["Customizable", "Job Specific", "Multiple Templates"],
-      deviceType: "Mobile",
+      deviceType: "Mobile Preview",
       images: [
         {
           src: "/images/cover1-mobile.png",
@@ -88,7 +88,7 @@ const BentoGrid = () => {
       description:
         "Get personalized career advice from our experts to help you navigate your professional journey.",
       tags: ["1-on-1 Sessions", "Expert Advice"],
-      deviceType: "Web",
+      deviceType: "Web Preview",
       images: [
         {
           src: "/images/career-counseling-web.png",
@@ -106,7 +106,7 @@ const BentoGrid = () => {
       description:
         "Discover your perfect career path with personalized guidance tailored just for you.",
       tags: ["Step-by-Step", "Resources"],
-      deviceType: "Web",
+      deviceType: "Web Preview",
       images: [
         { src: "/images/beginners-mobile.png", alt: "Beginner Web Screen" },
       ],
@@ -121,7 +121,7 @@ const BentoGrid = () => {
       description:
         "Showcase your skills with our AI-proctored assessments trusted by employers worldwide.",
       tags: ["Certified", "Proctored", "Industry Standard"],
-      deviceType: "Web",
+      deviceType: "Web Preview",
       images: [
         { src: "/images/proctoring-gif.gif", alt: "AI Skill Tests Web Screen" },
       ],

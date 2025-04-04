@@ -45,9 +45,9 @@ export default function Dashboard() {
 
   return (
     <ProtectedRoute>
-      <div className="min-h-screen bg-[#0D1117] flex flex-col">
+      <div className="min-h-screen bg-[#0D1117] px-4 flex flex-col">
         <main className="flex-grow container mx-auto px-4 py-16">
-          <h1 className="text-5xl font-bold mb-8 text-transparent bg-clip-text bg-gradient-to-r from-[#E31D65] to-[#FF6B2B]">
+          <h1 className="text-4xl font-bold mb-8 text-transparent bg-clip-text bg-gradient-to-r from-[#E31D65] to-[#FF6B2B]">
             Welcome to your Dashboard, {session.user?.name}!
           </h1>
 
