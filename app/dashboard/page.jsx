@@ -59,7 +59,7 @@ export default function Dashboard() {
           // Set skills from user data if available
           if (data.skills && Array.isArray(data.skills)) {
             setSkills(data.skills);
-            setSkillsSaved(true);
+            // Don't set skillsSaved to true here, so users can always add skills
           }
 
           // Check if all skills have been assessed
@@ -103,11 +103,13 @@ export default function Dashboard() {
     if (newSkill.trim() !== "" && !skills.includes(newSkill.trim())) {
       setSkills([...skills, newSkill.trim()]);
       setNewSkill("");
+      setSkillsSaved(false); // Reset skillsSaved when adding a new skill
     }
   };
 
   const removeSkill = (skillToRemove) => {
     setSkills(skills.filter((skill) => skill !== skillToRemove));
+    setSkillsSaved(false); // Reset skillsSaved when removing a skill
   };
 
   const saveSkills = async () => {
@@ -131,7 +133,7 @@ export default function Dashboard() {
       // Update the UI to show skills are saved
       setSkillsSaved(true);
 
-      // Update userData with new skills
+      // Update userData with new skills immediately to keep UI consistent
       setUserData((prev) => ({
         ...prev,
         skills: skills,
@@ -239,25 +241,21 @@ export default function Dashboard() {
                               Score: {getSkillScore(skill)}%
                             </span>
                           ) : (
-                            skillsSaved && (
-                              <button
-                                onClick={() => takeTest(skill)}
-                                className="mr-2 px-3 py-1 bg-gradient-to-r from-[#E31D65] to-[#FF6B2B] text-white rounded-md hover:opacity-90 flex items-center"
-                              >
-                                <PlayCircle className="h-4 w-4 mr-1" />
-                                Take Test
-                              </button>
-                            )
-                          )}
-                          {/* Only show remove button if skills are not saved yet */}
-                          {!skillsSaved && (
                             <button
-                              onClick={() => removeSkill(skill)}
-                              className="text-gray-400 hover:text-white"
+                              onClick={() => takeTest(skill)}
+                              className="mr-2 px-3 py-1 bg-gradient-to-r from-[#E31D65] to-[#FF6B2B] text-white rounded-md hover:opacity-90 flex items-center"
                             >
-                              ×
+                              <PlayCircle className="h-4 w-4 mr-1" />
+                              Take Test
                             </button>
                           )}
+                          {/* Allow removing a skill regardless of save status */}
+                          <button
+                            onClick={() => removeSkill(skill)}
+                            className="text-gray-400 hover:text-white"
+                          >
+                            ×
+                          </button>
                         </div>
                       </div>
                     ))}
@@ -272,14 +270,10 @@ export default function Dashboard() {
                     onKeyDown={(e) => e.key === "Enter" && addSkill()}
                     placeholder="Enter a skill (e.g., JavaScript, Python)"
                     className="flex-grow px-4 py-3 bg-[#0D1117] text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-[#E31D65]"
-                    disabled={skillsSaved}
                   />
                   <button
                     onClick={addSkill}
-                    className={`px-4 py-3 bg-[#1F2937] text-white rounded-lg hover:bg-[#2D3748] flex items-center ${
-                      skillsSaved ? "opacity-50 cursor-not-allowed" : ""
-                    }`}
-                    disabled={skillsSaved}
+                    className="px-4 py-3 bg-[#1F2937] text-white rounded-lg hover:bg-[#2D3748] flex items-center"
                   >
                     <PlusCircle className="h-5 w-5 mr-2" />
                     Add

@@ -11,6 +11,7 @@ import {
   ChevronRight,
   Trophy,
   PlusCircle,
+  PlayCircle,
 } from "lucide-react";
 import ChatbotController from "@/components/ChatbotController";
 
