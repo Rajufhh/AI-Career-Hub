@@ -12,6 +12,7 @@ import {
   Trophy,
   PlusCircle,
   PlayCircle,
+  Check,
 } from "lucide-react";
 import ChatbotController from "@/components/ChatbotController";
 
@@ -24,8 +25,10 @@ export default function Profile() {
 
   // Add new state variables for skill management
   const [newSkill, setNewSkill] = useState("");
+  const [savedSkills, setSavedSkills] = useState([]); // Skills saved in the database
+  const [newSkills, setNewSkills] = useState([]); // Newly added skills not yet saved
   const [isSaving, setIsSaving] = useState(false);
-  const [skillsSaved, setSkillsSaved] = useState(true); // Start with true since skills are loaded from DB
+  const [skillsSaved, setSkillsSaved] = useState(false);
   const [editingSkills, setEditingSkills] = useState(false);
 
   // Authentication check effect
@@ -48,6 +51,11 @@ export default function Profile() {
             throw new Error(data.error || "Error fetching profile");
           }
 
+          // Set saved skills from user data
+          if (data.skills && Array.isArray(data.skills)) {
+            setSavedSkills(data.skills);
+          }
+
           // Transform the data to match your profile structure
           const transformedProfile = {
             id: data._id,
@@ -59,19 +67,7 @@ export default function Profile() {
             country: data.country,
             gender: data.gender,
             domain: data.domain === "other" ? data.otherDomain : data.domain,
-            skills: data.skills.map((skill) => {
-              const skillScore = data.skillScores?.find(
-                (s) => s.skill === skill
-              );
-              return {
-                id: skill, // Using skill name as ID for simplicity
-                name: skill,
-                assessmentTaken: !!skillScore,
-                assessmentScore: skillScore
-                  ? Math.round(skillScore.score)
-                  : null,
-              };
-            }),
+            skillScores: data.skillScores || [],
             careerPath: {
               current: "Entry Level",
               next: ["Junior", "Mid-Level"],
@@ -97,56 +93,40 @@ export default function Profile() {
     fetchUserProfile();
   }, [session]);
 
-  const handleTakeAssessment = (skillId) => {
-    const skill = profile?.skills.find((s) => s.id === skillId);
-    if (skill) {
-      router.push(`/assessments?skill=${encodeURIComponent(skill.name)}`);
-    }
+  const handleTakeAssessment = (skill) => {
+    router.push(`/assessments?skill=${encodeURIComponent(skill)}`);
   };
 
   // Add function to handle adding a new skill
   const addSkill = () => {
     if (
       newSkill.trim() !== "" &&
-      !profile.skills.some((s) => s.name === newSkill.trim())
+      !savedSkills.includes(newSkill.trim()) &&
+      !newSkills.includes(newSkill.trim())
     ) {
-      const updatedSkills = [
-        ...profile.skills,
-        {
-          id: newSkill.trim(), // Using skill name as ID for simplicity
-          name: newSkill.trim(),
-          assessmentTaken: false,
-          assessmentScore: null,
-        },
-      ];
-
-      setProfile({
-        ...profile,
-        skills: updatedSkills,
-      });
-
+      setNewSkills([...newSkills, newSkill.trim()]);
       setNewSkill("");
+      setSkillsSaved(false);
     }
   };
 
-  // Add function to remove a skill
-  const removeSkill = (skillId) => {
-    const updatedSkills = profile.skills.filter(
-      (skill) => skill.id !== skillId
-    );
-    setProfile({
-      ...profile,
-      skills: updatedSkills,
-    });
+  // Add function to remove a saved skill
+  const removeSavedSkill = (skillToRemove) => {
+    setSavedSkills(savedSkills.filter((skill) => skill !== skillToRemove));
+    setSkillsSaved(false);
+  };
+
+  // Add function to remove a new skill
+  const removeNewSkill = (skillToRemove) => {
+    setNewSkills(newSkills.filter((skill) => skill !== skillToRemove));
   };
 
   // Add function to save skills to the database
   const saveSkills = async () => {
-    if (!profile || !profile.skills.length) return;
-
     try {
       setIsSaving(true);
-      const skillNames = profile.skills.map((skill) => skill.name);
+      // Combine saved skills and new skills for saving
+      const allSkills = [...savedSkills, ...newSkills];
 
       const response = await fetch("/api/update-user", {
         method: "POST",
@@ -154,7 +134,7 @@ export default function Profile() {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          skills: skillNames,
+          skills: allSkills,
         }),
       });
 
@@ -165,11 +145,15 @@ export default function Profile() {
 
       // Update the UI to show skills are saved
       setSkillsSaved(true);
+
+      // Move skills from newSkills to savedSkills
+      setSavedSkills(allSkills);
+      setNewSkills([]);
       setEditingSkills(false);
 
       // Show success message temporarily
       setTimeout(() => {
-        setSkillsSaved(true); // Keep it true since skills are now saved
+        setSkillsSaved(false);
       }, 2000);
     } catch (err) {
       console.error("Error saving skills:", err);
@@ -183,6 +167,19 @@ export default function Profile() {
   const startEditingSkills = () => {
     setEditingSkills(true);
     setSkillsSaved(false);
+  };
+
+  // Helper function to check if a skill has been assessed
+  const hasSkillScore = (skill) => {
+    return profile?.skillScores?.some((score) => score.skill === skill);
+  };
+
+  // Helper function to get the score for a skill
+  const getSkillScore = (skill) => {
+    const scoreObj = profile?.skillScores?.find(
+      (score) => score.skill === skill
+    );
+    return scoreObj ? Math.round(scoreObj.score) : null;
   };
 
   if (status === "loading" || loading) {
@@ -213,7 +210,6 @@ export default function Profile() {
     );
   }
 
-  // Update the Skills Assessment Card in the return statement
   return (
     <ProtectedRoute>
       <main className="min-h-screen bg-[#0D1117] py-8 px-4">
@@ -254,7 +250,7 @@ export default function Profile() {
               </h2>
               <div className="flex items-center">
                 <Trophy className="w-6 h-6 text-yellow-500 mr-2" />
-                {profile.skills.length > 0 && !editingSkills && (
+                {savedSkills.length > 0 && !editingSkills && (
                   <button
                     onClick={startEditingSkills}
                     className="text-sm px-3 py-1 bg-[#21262D] text-gray-300 rounded-md hover:bg-[#30363D]"
@@ -265,45 +261,79 @@ export default function Profile() {
               </div>
             </div>
 
-            {profile.skills.length > 0 ? (
+            {savedSkills.length > 0 || newSkills.length > 0 ? (
               <div className="space-y-4">
-                {/* Display skills list */}
-                <div className="flex flex-wrap gap-2 mb-6">
-                  {profile.skills.map((skill) => (
-                    <div
-                      key={skill.id}
-                      className="bg-[#1F2937] px-3 py-2 rounded-lg flex items-center justify-between w-full"
-                    >
-                      <span className="text-white">{skill.name}</span>
-                      <div className="flex items-center">
-                        {skill.assessmentTaken ? (
-                          <span className="mr-2 px-3 py-1 bg-green-700 text-white rounded-md flex items-center">
-                            Score: {skill.assessmentScore}%
-                          </span>
-                        ) : (
-                          skillsSaved && (
-                            <button
-                              onClick={() => handleTakeAssessment(skill.id)}
-                              className="mr-2 px-3 py-1 bg-gradient-to-r from-[#E31D65] to-[#FF6B2B] text-white rounded-md hover:opacity-90 flex items-center"
-                            >
-                              <PlayCircle className="h-4 w-4 mr-1" />
-                              Take Test
-                            </button>
-                          )
-                        )}
-                        {/* Only show remove button if in editing mode */}
-                        {editingSkills && (
-                          <button
-                            onClick={() => removeSkill(skill.id)}
-                            className="text-gray-400 hover:text-white"
-                          >
-                            ×
-                          </button>
-                        )}
-                      </div>
+                {/* Display saved skills list */}
+                {savedSkills.length > 0 && (
+                  <div className="mb-4">
+                    <h3 className="text-gray-300 text-sm font-medium mb-2">
+                      {editingSkills ? "Current Skills" : "Skills"}
+                    </h3>
+                    <div className="flex flex-wrap gap-2 mb-4">
+                      {savedSkills.map((skill, index) => (
+                        <div
+                          key={`saved-${index}`}
+                          className="bg-[#1F2937] px-3 py-2 rounded-lg flex items-center justify-between w-full"
+                        >
+                          <span className="text-white">{skill}</span>
+                          <div className="flex items-center">
+                            {hasSkillScore(skill) ? (
+                              <span className="mr-2 px-3 py-1 bg-green-700 text-white rounded-md flex items-center">
+                                Score: {getSkillScore(skill)}%
+                              </span>
+                            ) : (
+                              <button
+                                onClick={() => handleTakeAssessment(skill)}
+                                className="mr-2 px-3 py-1 bg-gradient-to-r from-[#E31D65] to-[#FF6B2B] text-white rounded-md hover:opacity-90 flex items-center"
+                              >
+                                <PlayCircle className="h-4 w-4 mr-1" />
+                                Take Test
+                              </button>
+                            )}
+                            {/* Only show remove button if in editing mode */}
+                            {editingSkills && (
+                              <button
+                                onClick={() => removeSavedSkill(skill)}
+                                className="text-gray-400 hover:text-white"
+                                aria-label="Remove skill"
+                              >
+                                ×
+                              </button>
+                            )}
+                          </div>
+                        </div>
+                      ))}
                     </div>
-                  ))}
-                </div>
+                  </div>
+                )}
+
+                {/* Display new (unsaved) skills */}
+                {newSkills.length > 0 && (
+                  <div className="mb-4">
+                    <h3 className="text-gray-300 text-sm font-medium mb-2">
+                      New Skills (Unsaved)
+                    </h3>
+                    <div className="flex flex-wrap gap-2 mb-4">
+                      {newSkills.map((skill, index) => (
+                        <div
+                          key={`new-${index}`}
+                          className="bg-[#1F2937] border border-[#E31D65] px-3 py-2 rounded-lg flex items-center justify-between w-full"
+                        >
+                          <span className="text-white">{skill}</span>
+                          <div className="flex items-center">
+                            <button
+                              onClick={() => removeNewSkill(skill)}
+                              className="text-gray-400 hover:text-white"
+                              aria-label="Remove skill"
+                            >
+                              ×
+                            </button>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
 
                 {/* Show input field and save button only when editing */}
                 {editingSkills && (
@@ -328,10 +358,16 @@ export default function Profile() {
 
                     <button
                       onClick={saveSkills}
-                      disabled={profile.skills.length === 0 || isSaving}
+                      disabled={
+                        (savedSkills.length === 0 && newSkills.length === 0) ||
+                        isSaving
+                      }
                       className={`w-full px-4 py-3 rounded-lg flex items-center justify-center ${
-                        profile.skills.length === 0 || isSaving
+                        (savedSkills.length === 0 && newSkills.length === 0) ||
+                        isSaving
                           ? "bg-gray-600 cursor-not-allowed"
+                          : skillsSaved
+                          ? "bg-green-700"
                           : "bg-gradient-to-r from-[#E31D65] to-[#FF6B2B] hover:opacity-90"
                       } text-white transition-all duration-200`}
                     >
@@ -339,6 +375,11 @@ export default function Profile() {
                         <>
                           <div className="animate-spin h-5 w-5 mr-2 border-2 border-white border-t-transparent rounded-full"></div>
                           Saving...
+                        </>
+                      ) : skillsSaved ? (
+                        <>
+                          <Check className="h-5 w-5 mr-2" />
+                          Skills Saved!
                         </>
                       ) : (
                         <>Save Skills</>
@@ -375,9 +416,9 @@ export default function Profile() {
 
                   <button
                     onClick={saveSkills}
-                    disabled={profile.skills.length === 0 || isSaving}
+                    disabled={newSkills.length === 0 || isSaving}
                     className={`w-full px-4 py-3 rounded-lg flex items-center justify-center ${
-                      profile.skills.length === 0 || isSaving
+                      newSkills.length === 0 || isSaving
                         ? "bg-gray-600 cursor-not-allowed"
                         : "bg-gradient-to-r from-[#E31D65] to-[#FF6B2B] hover:opacity-90"
                     } text-white transition-all duration-200`}
