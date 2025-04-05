@@ -269,7 +269,7 @@ export default function Dashboard() {
                     type="text"
                     value={newSkill}
                     onChange={(e) => setNewSkill(e.target.value)}
-                    onKeyPress={(e) => e.key === "Enter" && addSkill()}
+                    onKeyDown={(e) => e.key === "Enter" && addSkill()}
                     placeholder="Enter a skill (e.g., JavaScript, Python)"
                     className="flex-grow px-4 py-3 bg-[#0D1117] text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-[#E31D65]"
                     disabled={skillsSaved}
@@ -327,8 +327,8 @@ export default function Dashboard() {
                 </div>
               </div>
 
-              {/* Career Counseling Box - Now with fixed height */}
-              <div className="bg-[#161B22] p-6 rounded-lg shadow-md lg:w-[450px] lg:self-start relative overflow-hidden">
+              {/* Career Counseling Box - Now with fixed height and width */}
+              <div className="bg-[#161B22] p-6 rounded-lg shadow-md lg:w-[450px] lg:self-start relative overflow-hidden h-fit">
                 <div className="absolute top-0 right-0 w-24 h-24 bg-gradient-to-br from-[#E31D65] to-[#FF6B2B] opacity-10 rounded-bl-full"></div>
 
                 <div className="flex items-center mb-6">
