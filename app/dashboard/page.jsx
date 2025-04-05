@@ -384,8 +384,8 @@ export default function Dashboard() {
                   onClick={() => handleCardClick("/resume-analyze")}
                 />
                 <DashboardCard
-                  title="CV Generator"
-                  description="Create a professional CV tailored to your target job."
+                  title="Cover Letter Generator"
+                  description="Create a Cover Letter tailored to your target job."
                   icon={
                     <FileSpreadsheet className="h-8 w-8 text-primary-start" />
                   }
@@ -393,7 +393,7 @@ export default function Dashboard() {
                 />
                 <DashboardCard
                   title="Job Scraper"
-                  description="Find job opportunities matching your skills and preferences."
+                  description="Find job opportunities matching your skills."
                   icon={<Search className="h-8 w-8 text-primary-start" />}
                   onClick={() => handleCardClick("/job-scraper")}
                 />
