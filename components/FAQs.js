@@ -6,8 +6,11 @@ import { ChevronDown } from "lucide-react"
 
 export default function FAQSection() {
   const [openIndex, setOpenIndex] = useState(null)
+  const [currentPage, setCurrentPage] = useState(1)
+  const questionsPerPage = 5
 
   const faqItems = [
+    // Page 1
     {
       question: "What is this platform, and what is its purpose?",
       answer:
@@ -33,101 +36,134 @@ export default function FAQSection() {
       answer:
         "Our AI-driven mock interview simulates real interview scenarios based on your chosen job role and experience level. It provides real-time feedback on your responses.",
     },
+    
+    // Page 2
+    {
+      question: "Is there a chatbot available on the website?",
+      answer: "Yes, there's a chatbot available in the bottom right corner to help answer your questions instantly.",
+    },
+    {
+      question: "Do I need to login to access the Beginner section?",
+      answer:
+        "No, the Beginner section is accessible without login, but you'll need to sign in for personalized results.",
+    },
+    {
+      question: "Can I access the platform on mobile devices?",
+      answer:
+        "Yes, the platform is fully responsive with dedicated mobile interfaces, as shown by the Mobile Preview for the cover letter generator.",
+    },
+    {
+      question: "Is there a cost to use the platform?",
+      answer: "No, there is no cost of using this platform.",
+    },
+    {
+      question: "Is my data secure on the website?",
+      answer:
+        "Yes, we take your privacy seriously. All your data is protected and used only for improving your experience.",
+    },
+    
+    // Page 3
+    {
+      question: "What can the chatbot help me with?",
+      answer:
+        "Our chatbot can answer your queries, guide you through plans, and help you understand services like career counselling and assessments.",
+    },
+    {
+      question: "Can I ask about different plans through the chatbot?",
+      answer: "Just type your query and the chatbot will assist you with available plans and features.",
+    },
+    {
+      question: "Are there any prerequisites for career counseling?",
+      answer: "Yes, you need to complete the skill assessment test before accessing the career counseling features.",
+    },
+    {
+      question: "How do I sign up on the website?",
+      answer:
+        "Click on the Login/Sign Up button at the top right corner of the website and fill in the required details to get started.",
+    },
+    {
+      question: "Do you have any job listing feature on the website?",
+      answer:
+        "Yes, we have a Job Scraper that shows job links posted in the last 24 hours, based on availability and your preferences.",
+    },
   ]
+
+  const indexOfLastQuestion = currentPage * questionsPerPage
+  const indexOfFirstQuestion = indexOfLastQuestion - questionsPerPage
+  const currentQuestions = faqItems.slice(indexOfFirstQuestion, indexOfLastQuestion)
+  const totalPages = Math.ceil(faqItems.length / questionsPerPage)
 
   const toggleFAQ = (index) => {
     setOpenIndex(openIndex === index ? null : index)
   }
 
+  const changePage = (pageNumber) => {
+    setOpenIndex(null)
+    setCurrentPage(pageNumber)
+  }
+
   return (
     <div className="bg-[#161B22] p-8 shadow-lg mt-12">
+      <div className="w-full max-w-4xl mx-auto">
+        <div className="text-center mb-12">
+          <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold">
+            <span className="bg-gradient-to-r from-[#E31D65] to-[#FF6B2B] text-transparent bg-clip-text">
+              Frequently Asked Questions
+            </span>
+          </h1>
+        </div>
 
-    <div className="w-full max-w-4xl mx-auto">
-      <div className="text-center mb-12">
-        <h1 className="text-4xl md:text-5xl font-bold">
-          <span className="bg-gradient-to-r from-[#E31D65] to-[#FF6B2B] text-transparent bg-clip-text">
-            Frequently Asked Questions
-          </span>
-        </h1>
-      </div>
-
-      <div className="space-y-4">
-        {faqItems.map((item, index) => (
-          <motion.div
-            key={index}
-            className={`rounded-lg overflow-hidden ${openIndex === index ? "gradient-border" : "bg-[#0D1117]"}`}
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{
-              duration: 0.5,
-              delay: index * 0.1,
-              ease: "easeOut",
-            }}
-          >
-            {openIndex === index ? (
-              <div className="p-[2px] bg-gradient-to-r from-[#E31D65] to-[#FF6B2B] rounded-lg">
-                <div className="bg-[#161B22] rounded-lg">
-                  <button
-                    className="w-full p-6 text-left flex justify-between items-center focus:outline-none"
-                    onClick={() => toggleFAQ(index)}
-                  >
-                    <span className="text-lg md:text-xl font-medium text-white">{item.question}</span>
-                    <motion.div animate={{ rotate: 180 }} transition={{ duration: 0.4 }}>
-                      <ChevronDown className="h-6 w-6 text-white" />
-                    </motion.div>
-                  </button>
-
-                  <AnimatePresence>
-                    <motion.div
-                      initial={{ height: 0, opacity: 0 }}
-                      animate={{
-                        height: "auto",
-                        opacity: 1,
-                        transition: {
-                          height: {
-                            duration: 0.4,
-                            ease: [0.04, 0.62, 0.23, 0.98],
-                          },
-                          opacity: {
-                            duration: 0.25,
-                            delay: 0.15,
-                          },
-                        },
-                      }}
-                      exit={{
-                        height: 0,
-                        opacity: 0,
-                        transition: {
-                          height: {
-                            duration: 0.3,
-                          },
-                          opacity: {
-                            duration: 0.25,
-                          },
-                        },
-                      }}
-                      className="overflow-hidden"
+        <div className="space-y-4">
+          {currentQuestions.map((item, index) => (
+            <div
+              key={index}
+              className={`rounded-lg overflow-hidden ${openIndex === index ? "gradient-border" : "bg-[#0D1117]"}`}
+            >
+              {openIndex === index ? (
+                <div className="p-[2px] bg-gradient-to-r from-[#E31D65] to-[#FF6B2B] rounded-lg">
+                  <div className="bg-[#161B22] rounded-lg">
+                    <button
+                      className="w-full p-6 text-left flex justify-between items-center focus:outline-none"
+                      onClick={() => toggleFAQ(index)}
                     >
-                      <div className="p-6 pt-0 text-gray-300">{item.answer}</div>
-                    </motion.div>
-                  </AnimatePresence>
+                      <span className="text-lg md:text-xl font-medium text-white">{item.question}</span>
+                      <ChevronDown className="h-6 w-6 text-white transform rotate-180 transition-transform duration-200" />
+                    </button>
+                    <div className="p-6 pt-0 text-sm sm:text-base text-gray-300">{item.answer}</div>
+                  </div>
                 </div>
-              </div>
-            ) : (
+              ) : (
+                <button
+                  className="w-full p-6 text-left flex justify-between items-center focus:outline-none"
+                  onClick={() => toggleFAQ(index)}
+                >
+                  <span className="text-lg md:text-xl font-medium text-white">{item.question}</span>
+                  <ChevronDown className="h-6 w-6 text-white transition-transform duration-200" />
+                </button>
+              )}
+            </div>
+          ))}
+        </div>
+
+        {/* Pagination */}
+        <div className="flex justify-center mt-8">
+          <div className="inline-flex p-1 bg-[#0D1117] rounded-lg">
+            {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
               <button
-                className="w-full p-6 text-left flex justify-between items-center focus:outline-none"
-                onClick={() => toggleFAQ(index)}
+                key={page}
+                onClick={() => changePage(page)}
+                className={`px-4 py-2 mx-1 rounded-md text-sm font-medium transition-all duration-300 relative ${
+                  currentPage === page 
+                    ? "text-white bg-gradient-to-r from-[#E31D65] to-[#FF6B2B]" 
+                    : "text-gray-400 hover:text-white"
+                }`}
               >
-                <span className="text-lg md:text-xl font-medium text-white">{item.question}</span>
-                <motion.div animate={{ rotate: 0 }} transition={{ duration: 0.4 }}>
-                  <ChevronDown className="h-6 w-6 text-white" />
-                </motion.div>
+                {page}
               </button>
-            )}
-          </motion.div>
-        ))}
+            ))}
+          </div>
+        </div>
       </div>
-    </div>
     </div>
   )
 }
