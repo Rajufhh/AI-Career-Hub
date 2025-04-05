@@ -4,16 +4,7 @@ import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { useSession } from "next-auth/react";
 import { ProtectedRoute } from "@/services/routeProtectionService";
-import {
-  MapPin,
-  Book,
-  Briefcase,
-  ChevronRight,
-  Trophy,
-  PlusCircle,
-  PlayCircle,
-  Check,
-} from "lucide-react";
+import { MapPin, Book, Briefcase, ChevronRight, Trophy } from "lucide-react";
 import ChatbotController from "@/components/ChatbotController";
 
 export default function Profile() {
@@ -22,14 +13,6 @@ export default function Profile() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const router = useRouter();
-
-  // Add new state variables for skill management
-  const [newSkill, setNewSkill] = useState("");
-  const [savedSkills, setSavedSkills] = useState([]); // Skills saved in the database
-  const [newSkills, setNewSkills] = useState([]); // Newly added skills not yet saved
-  const [isSaving, setIsSaving] = useState(false);
-  const [skillsSaved, setSkillsSaved] = useState(false);
-  const [editingSkills, setEditingSkills] = useState(false);
 
   // Authentication check effect
   useEffect(() => {
@@ -51,11 +34,6 @@ export default function Profile() {
             throw new Error(data.error || "Error fetching profile");
           }
 
-          // Set saved skills from user data
-          if (data.skills && Array.isArray(data.skills)) {
-            setSavedSkills(data.skills);
-          }
-
           // Transform the data to match your profile structure
           const transformedProfile = {
             id: data._id,
@@ -66,8 +44,21 @@ export default function Profile() {
             state: data.state,
             country: data.country,
             gender: data.gender,
+            race: data.race,
             domain: data.domain === "other" ? data.otherDomain : data.domain,
-            skillScores: data.skillScores || [],
+            skills: data.skills.map((skill) => {
+              const skillScore = data.skillScores?.find(
+                (s) => s.skill === skill
+              );
+              return {
+                id: skill, // Using skill name as ID for simplicity
+                name: skill,
+                assessmentTaken: !!skillScore,
+                assessmentScore: skillScore
+                  ? Math.round(skillScore.score)
+                  : null,
+              };
+            }),
             careerPath: {
               current: "Entry Level",
               next: ["Junior", "Mid-Level"],
@@ -93,93 +84,11 @@ export default function Profile() {
     fetchUserProfile();
   }, [session]);
 
-  const handleTakeAssessment = (skill) => {
-    router.push(`/assessments?skill=${encodeURIComponent(skill)}`);
-  };
-
-  // Add function to handle adding a new skill
-  const addSkill = () => {
-    if (
-      newSkill.trim() !== "" &&
-      !savedSkills.includes(newSkill.trim()) &&
-      !newSkills.includes(newSkill.trim())
-    ) {
-      setNewSkills([...newSkills, newSkill.trim()]);
-      setNewSkill("");
-      setSkillsSaved(false);
+  const handleTakeAssessment = (skillId) => {
+    const skill = profile?.skills.find((s) => s.id === skillId);
+    if (skill) {
+      router.push(`/assessments?skill=${encodeURIComponent(skill.name)}`);
     }
-  };
-
-  // Add function to remove a saved skill
-  const removeSavedSkill = (skillToRemove) => {
-    setSavedSkills(savedSkills.filter((skill) => skill !== skillToRemove));
-    setSkillsSaved(false);
-  };
-
-  // Add function to remove a new skill
-  const removeNewSkill = (skillToRemove) => {
-    setNewSkills(newSkills.filter((skill) => skill !== skillToRemove));
-  };
-
-  // Add function to save skills to the database
-  const saveSkills = async () => {
-    try {
-      setIsSaving(true);
-      // Combine saved skills and new skills for saving
-      const allSkills = [...savedSkills, ...newSkills];
-
-      const response = await fetch("/api/update-user", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          skills: allSkills,
-        }),
-      });
-
-      if (!response.ok) {
-        const data = await response.json();
-        throw new Error(data.error || "Failed to save skills");
-      }
-
-      // Update the UI to show skills are saved
-      setSkillsSaved(true);
-
-      // Move skills from newSkills to savedSkills
-      setSavedSkills(allSkills);
-      setNewSkills([]);
-      setEditingSkills(false);
-
-      // Show success message temporarily
-      setTimeout(() => {
-        setSkillsSaved(false);
-      }, 2000);
-    } catch (err) {
-      console.error("Error saving skills:", err);
-      setError(err.message);
-    } finally {
-      setIsSaving(false);
-    }
-  };
-
-  // Function to start editing skills
-  const startEditingSkills = () => {
-    setEditingSkills(true);
-    setSkillsSaved(false);
-  };
-
-  // Helper function to check if a skill has been assessed
-  const hasSkillScore = (skill) => {
-    return profile?.skillScores?.some((score) => score.skill === skill);
-  };
-
-  // Helper function to get the score for a skill
-  const getSkillScore = (skill) => {
-    const scoreObj = profile?.skillScores?.find(
-      (score) => score.skill === skill
-    );
-    return scoreObj ? Math.round(scoreObj.score) : null;
   };
 
   if (status === "loading" || loading) {
@@ -248,191 +157,42 @@ export default function Profile() {
               <h2 className="text-xl font-bold text-white">
                 Skills Assessment
               </h2>
-              <div className="flex items-center">
-                <Trophy className="w-6 h-6 text-yellow-500 mr-2" />
-                {savedSkills.length > 0 && !editingSkills && (
-                  <button
-                    onClick={startEditingSkills}
-                    className="text-sm px-3 py-1 bg-[#21262D] text-gray-300 rounded-md hover:bg-[#30363D]"
-                  >
-                    Edit Skills
-                  </button>
-                )}
-              </div>
+              <Trophy className="w-6 h-6 text-yellow-500" />
             </div>
-
-            {savedSkills.length > 0 || newSkills.length > 0 ? (
+            {profile.skills && profile.skills.length > 0 ? (
               <div className="space-y-4">
-                {/* Display saved skills list */}
-                {savedSkills.length > 0 && (
-                  <div className="mb-4">
-                    <h3 className="text-gray-300 text-sm font-medium mb-2">
-                      {editingSkills ? "Current Skills" : "Skills"}
-                    </h3>
-                    <div className="flex flex-wrap gap-2 mb-4">
-                      {savedSkills.map((skill, index) => (
-                        <div
-                          key={`saved-${index}`}
-                          className="bg-[#1F2937] px-3 py-2 rounded-lg flex items-center justify-between w-full"
-                        >
-                          <span className="text-white">{skill}</span>
-                          <div className="flex items-center">
-                            {hasSkillScore(skill) ? (
-                              <span className="mr-2 px-3 py-1 bg-green-700 text-white rounded-md flex items-center">
-                                Score: {getSkillScore(skill)}%
-                              </span>
-                            ) : (
-                              <button
-                                onClick={() => handleTakeAssessment(skill)}
-                                className="mr-2 px-3 py-1 bg-gradient-to-r from-[#E31D65] to-[#FF6B2B] text-white rounded-md hover:opacity-90 flex items-center"
-                              >
-                                <PlayCircle className="h-4 w-4 mr-1" />
-                                Take Test
-                              </button>
-                            )}
-                            {/* Only show remove button if in editing mode */}
-                            {editingSkills && (
-                              <button
-                                onClick={() => removeSavedSkill(skill)}
-                                className="text-gray-400 hover:text-white"
-                                aria-label="Remove skill"
-                              >
-                                ×
-                              </button>
-                            )}
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                )}
-
-                {/* Display new (unsaved) skills */}
-                {newSkills.length > 0 && (
-                  <div className="mb-4">
-                    <h3 className="text-gray-300 text-sm font-medium mb-2">
-                      New Skills (Unsaved)
-                    </h3>
-                    <div className="flex flex-wrap gap-2 mb-4">
-                      {newSkills.map((skill, index) => (
-                        <div
-                          key={`new-${index}`}
-                          className="bg-[#1F2937] border border-[#E31D65] px-3 py-2 rounded-lg flex items-center justify-between w-full"
-                        >
-                          <span className="text-white">{skill}</span>
-                          <div className="flex items-center">
-                            <button
-                              onClick={() => removeNewSkill(skill)}
-                              className="text-gray-400 hover:text-white"
-                              aria-label="Remove skill"
-                            >
-                              ×
-                            </button>
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                )}
-
-                {/* Show input field and save button only when editing */}
-                {editingSkills && (
-                  <>
-                    <div className="flex gap-2 mb-6">
-                      <input
-                        type="text"
-                        value={newSkill}
-                        onChange={(e) => setNewSkill(e.target.value)}
-                        onKeyPress={(e) => e.key === "Enter" && addSkill()}
-                        placeholder="Enter a skill (e.g., JavaScript, Python)"
-                        className="flex-grow px-4 py-3 bg-[#0D1117] text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-[#E31D65]"
-                      />
-                      <button
-                        onClick={addSkill}
-                        className="px-4 py-3 bg-[#1F2937] text-white rounded-lg hover:bg-[#2D3748] flex items-center"
-                      >
-                        <PlusCircle className="h-5 w-5 mr-2" />
-                        Add
-                      </button>
-                    </div>
-
-                    <button
-                      onClick={saveSkills}
-                      disabled={
-                        (savedSkills.length === 0 && newSkills.length === 0) ||
-                        isSaving
-                      }
-                      className={`w-full px-4 py-3 rounded-lg flex items-center justify-center ${
-                        (savedSkills.length === 0 && newSkills.length === 0) ||
-                        isSaving
-                          ? "bg-gray-600 cursor-not-allowed"
-                          : skillsSaved
-                          ? "bg-green-700"
-                          : "bg-gradient-to-r from-[#E31D65] to-[#FF6B2B] hover:opacity-90"
-                      } text-white transition-all duration-200`}
-                    >
-                      {isSaving ? (
-                        <>
-                          <div className="animate-spin h-5 w-5 mr-2 border-2 border-white border-t-transparent rounded-full"></div>
-                          Saving...
-                        </>
-                      ) : skillsSaved ? (
-                        <>
-                          <Check className="h-5 w-5 mr-2" />
-                          Skills Saved!
-                        </>
-                      ) : (
-                        <>Save Skills</>
+                {profile.skills.map((skill) => (
+                  <div key={skill.id} className="p-4 bg-[#21262D] rounded-lg">
+                    <div className="flex items-center justify-between mb-2">
+                      <h3 className="text-white font-medium">{skill.name}</h3>
+                      {skill.assessmentTaken && (
+                        <span className="text-sm font-medium text-green-400">
+                          Score: {skill.assessmentScore}%
+                        </span>
                       )}
-                    </button>
-                  </>
-                )}
+                    </div>
+                    {!skill.assessmentTaken && (
+                      <button
+                        onClick={() => handleTakeAssessment(skill.id)}
+                        className="w-full mt-2 py-2 px-4 bg-gradient-to-r from-[#E31D65] to-[#FF6B2B] text-white rounded-lg hover:opacity-90 transition-opacity"
+                      >
+                        Take Assessment
+                      </button>
+                    )}
+                  </div>
+                ))}
               </div>
             ) : (
-              <div className="space-y-4">
-                <div className="p-4 bg-[#21262D] rounded-lg">
-                  <p className="text-gray-400 mb-4">
-                    You haven't added any skills yet. Add skills to take
-                    assessments and track your progress.
-                  </p>
-
-                  <div className="flex gap-2 mb-4">
-                    <input
-                      type="text"
-                      value={newSkill}
-                      onChange={(e) => setNewSkill(e.target.value)}
-                      onKeyPress={(e) => e.key === "Enter" && addSkill()}
-                      placeholder="Enter a skill (e.g., JavaScript, Python)"
-                      className="flex-grow px-4 py-3 bg-[#0D1117] text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-[#E31D65]"
-                    />
-                    <button
-                      onClick={addSkill}
-                      className="px-4 py-3 bg-[#1F2937] text-white rounded-lg hover:bg-[#2D3748] flex items-center"
-                    >
-                      <PlusCircle className="h-5 w-5 mr-2" />
-                      Add
-                    </button>
-                  </div>
-
-                  <button
-                    onClick={saveSkills}
-                    disabled={newSkills.length === 0 || isSaving}
-                    className={`w-full px-4 py-3 rounded-lg flex items-center justify-center ${
-                      newSkills.length === 0 || isSaving
-                        ? "bg-gray-600 cursor-not-allowed"
-                        : "bg-gradient-to-r from-[#E31D65] to-[#FF6B2B] hover:opacity-90"
-                    } text-white transition-all duration-200`}
-                  >
-                    {isSaving ? (
-                      <>
-                        <div className="animate-spin h-5 w-5 mr-2 border-2 border-white border-t-transparent rounded-full"></div>
-                        Saving...
-                      </>
-                    ) : (
-                      <>Save Skills</>
-                    )}
-                  </button>
-                </div>
+              <div className="p-6 bg-[#21262D] rounded-lg text-center">
+                <p className="text-white mb-4">
+                  You haven't added any skills to your profile yet.
+                </p>
+                <button
+                  onClick={() => router.push("/dashboard")}
+                  className="py-2 px-6 bg-gradient-to-r from-[#E31D65] to-[#FF6B2B] text-white rounded-lg hover:opacity-90 transition-opacity"
+                >
+                  Add Skills via Dashboard
+                </button>
               </div>
             )}
           </div>
