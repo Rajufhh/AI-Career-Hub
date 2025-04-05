@@ -33,6 +33,7 @@ export default function Dashboard() {
   const [skills, setSkills] = useState([]);
   const [newSkill, setNewSkill] = useState("");
   const [skillsSaved, setSkillsSaved] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
   const [userData, setUserData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -111,6 +112,7 @@ export default function Dashboard() {
 
   const saveSkills = async () => {
     try {
+      setIsSaving(true);
       const response = await fetch("/api/update-user", {
         method: "POST",
         headers: {
@@ -137,11 +139,13 @@ export default function Dashboard() {
 
       // Show success message temporarily
       setTimeout(() => {
-        // Don't reset skillsSaved to false as we want to keep showing the Take Test buttons
-      }, 3000);
+        setSkillsSaved(false);
+      }, 2000);
     } catch (error) {
       console.error("Error saving skills:", error);
       alert("Failed to save skills: " + error.message);
+    } finally {
+      setIsSaving(false);
     }
   };
 
@@ -245,12 +249,15 @@ export default function Dashboard() {
                               </button>
                             )
                           )}
-                          <button
-                            onClick={() => removeSkill(skill)}
-                            className="text-gray-400 hover:text-white"
-                          >
-                            ×
-                          </button>
+                          {/* Only show remove button if skills are not saved yet */}
+                          {!skillsSaved && (
+                            <button
+                              onClick={() => removeSkill(skill)}
+                              className="text-gray-400 hover:text-white"
+                            >
+                              ×
+                            </button>
+                          )}
                         </div>
                       </div>
                     ))}
@@ -265,10 +272,14 @@ export default function Dashboard() {
                     onKeyPress={(e) => e.key === "Enter" && addSkill()}
                     placeholder="Enter a skill (e.g., JavaScript, Python)"
                     className="flex-grow px-4 py-3 bg-[#0D1117] text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-[#E31D65]"
+                    disabled={skillsSaved}
                   />
                   <button
                     onClick={addSkill}
-                    className="px-4 py-3 bg-[#1F2937] text-white rounded-lg hover:bg-[#2D3748] flex items-center"
+                    className={`px-4 py-3 bg-[#1F2937] text-white rounded-lg hover:bg-[#2D3748] flex items-center ${
+                      skillsSaved ? "opacity-50 cursor-not-allowed" : ""
+                    }`}
+                    disabled={skillsSaved}
                   >
                     <PlusCircle className="h-5 w-5 mr-2" />
                     Add
@@ -277,14 +288,21 @@ export default function Dashboard() {
 
                 <button
                   onClick={saveSkills}
-                  disabled={skills.length === 0}
+                  disabled={skills.length === 0 || isSaving}
                   className={`w-full px-4 py-3 rounded-lg flex items-center justify-center ${
-                    skills.length === 0
+                    skills.length === 0 || isSaving
                       ? "bg-gray-600 cursor-not-allowed"
+                      : skillsSaved
+                      ? "bg-green-700"
                       : "bg-gradient-to-r from-[#E31D65] to-[#FF6B2B] hover:opacity-90"
-                  } text-white transition-opacity duration-200`}
+                  } text-white transition-all duration-200`}
                 >
-                  {skillsSaved ? (
+                  {isSaving ? (
+                    <>
+                      <div className="animate-spin h-5 w-5 mr-2 border-2 border-white border-t-transparent rounded-full"></div>
+                      Saving...
+                    </>
+                  ) : skillsSaved ? (
                     <>
                       <Check className="h-5 w-5 mr-2" />
                       Skills Saved!
@@ -309,8 +327,8 @@ export default function Dashboard() {
                 </div>
               </div>
 
-              {/* Career Counseling Box */}
-              <div className="bg-[#161B22] p-6 rounded-lg shadow-md flex-1 relative overflow-hidden">
+              {/* Career Counseling Box - Now with fixed height */}
+              <div className="bg-[#161B22] p-6 rounded-lg shadow-md lg:w-[450px] lg:self-start relative overflow-hidden">
                 <div className="absolute top-0 right-0 w-24 h-24 bg-gradient-to-br from-[#E31D65] to-[#FF6B2B] opacity-10 rounded-bl-full"></div>
 
                 <div className="flex items-center mb-6">
@@ -443,7 +461,8 @@ function TabButton({ label, icon, isActive, onClick }) {
 
 function DashboardCard({ title, description, icon, onClick }) {
   return (
-    <div className="bg-[#161B22] p-6 rounded-lg shadow-md hover:shadow-lg transition-shadow duration-200">
+    <div className="bg-[#161B22] p-6 rounded-lg shadow-md hover:shadow-lg transition-shadow duration-200 relative overflow-hidden">
+      <div className="absolute top-0 right-0 w-24 h-24 bg-gradient-to-br from-[#E31D65] to-[#FF6B2B] opacity-10 rounded-bl-full"></div>
       <div className="flex items-center mb-4">
         {icon}
         <h2 className="text-xl font-semibold ml-4 text-white">{title}</h2>

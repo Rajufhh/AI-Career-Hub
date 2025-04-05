@@ -60,14 +60,24 @@ function CareerGuidance() {
 
         // Determine if we need to show the skill form
         const needsSkillForm =
-          !data.skills ||
-          data.skills.length === 0 ||
-          !data.domain
+          !data.skills || data.skills.length === 0 || !data.domain;
         setShowSkillForm(needsSkillForm);
 
         // If user has all skills and they have scores, try to fetch guidance
         if (!needsSkillForm) {
-          fetchGuidance();
+          // Check if all skills have scores before fetching guidance
+          const allSkillsHaveScores = data.skills.every((skill) =>
+            data.skillScores?.some((score) => score.skill === skill)
+          );
+
+          if (allSkillsHaveScores) {
+            fetchGuidance();
+          } else {
+            setError(
+              "Please complete skill assessments for all skills before requesting career guidance. Go to your profile to take assessments."
+            );
+            setLoading(false);
+          }
         } else {
           setLoading(false);
         }

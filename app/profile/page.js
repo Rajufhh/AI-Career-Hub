@@ -4,7 +4,14 @@ import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { useSession } from "next-auth/react";
 import { ProtectedRoute } from "@/services/routeProtectionService";
-import { MapPin, Book, Briefcase, ChevronRight, Trophy } from "lucide-react";
+import {
+  MapPin,
+  Book,
+  Briefcase,
+  ChevronRight,
+  Trophy,
+  PlusCircle,
+} from "lucide-react";
 import ChatbotController from "@/components/ChatbotController";
 
 export default function Profile() {
@@ -13,6 +20,10 @@ export default function Profile() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const router = useRouter();
+
+  // Add new state variables for skill management
+  const [newSkill, setNewSkill] = useState("");
+  const [isSaving, setIsSaving] = useState(false);
 
   // Authentication check effect
   useEffect(() => {
@@ -90,6 +101,61 @@ export default function Profile() {
     }
   };
 
+  // Add function to handle adding a new skill
+  const handleAddSkill = () => {
+    if (
+      newSkill.trim() !== "" &&
+      !profile.skills.some((s) => s.name === newSkill.trim())
+    ) {
+      const updatedSkills = [
+        ...profile.skills,
+        {
+          id: newSkill.trim(),
+          name: newSkill.trim(),
+          assessmentTaken: false,
+          assessmentScore: null,
+        },
+      ];
+
+      setProfile({
+        ...profile,
+        skills: updatedSkills,
+      });
+
+      setNewSkill("");
+    }
+  };
+
+  // Add function to save skills to the database
+  const saveSkills = async () => {
+    if (!profile || !profile.skills.length) return;
+
+    try {
+      setIsSaving(true);
+      const skillNames = profile.skills.map((skill) => skill.name);
+
+      const response = await fetch("/api/update-user", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          skills: skillNames,
+        }),
+      });
+
+      if (!response.ok) {
+        const data = await response.json();
+        throw new Error(data.error || "Failed to save skills");
+      }
+    } catch (err) {
+      console.error("Error saving skills:", err);
+      setError(err.message);
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
   if (status === "loading" || loading) {
     return (
       <div className="min-h-screen bg-[#0D1117] flex items-center justify-center">
@@ -118,6 +184,7 @@ export default function Profile() {
     );
   }
 
+  // Update the Skills Assessment Card in the return statement
   return (
     <ProtectedRoute>
       <main className="min-h-screen bg-[#0D1117] py-8 px-4">
@@ -158,28 +225,77 @@ export default function Profile() {
               </h2>
               <Trophy className="w-6 h-6 text-yellow-500" />
             </div>
-            <div className="space-y-4">
-              {profile.skills.map((skill) => (
-                <div key={skill.id} className="p-4 bg-[#21262D] rounded-lg">
-                  <div className="flex items-center justify-between mb-2">
-                    <h3 className="text-white font-medium">{skill.name}</h3>
-                    {skill.assessmentTaken && (
-                      <span className="text-sm font-medium text-green-400">
-                        Score: {skill.assessmentScore}%
-                      </span>
+
+            {profile.skills.length > 0 ? (
+              <div className="space-y-4">
+                {profile.skills.map((skill) => (
+                  <div key={skill.id} className="p-4 bg-[#21262D] rounded-lg">
+                    <div className="flex items-center justify-between mb-2">
+                      <h3 className="text-white font-medium">{skill.name}</h3>
+                      {skill.assessmentTaken && (
+                        <span className="text-sm font-medium text-green-400">
+                          Score: {skill.assessmentScore}%
+                        </span>
+                      )}
+                    </div>
+                    {!skill.assessmentTaken && (
+                      <button
+                        onClick={() => handleTakeAssessment(skill.id)}
+                        className="w-full mt-2 py-2 px-4 bg-gradient-to-r from-[#E31D65] to-[#FF6B2B] text-white rounded-lg hover:opacity-90 transition-opacity"
+                      >
+                        Take Assessment
+                      </button>
                     )}
                   </div>
-                  {!skill.assessmentTaken && (
+                ))}
+              </div>
+            ) : (
+              <div className="space-y-4">
+                <div className="p-4 bg-[#21262D] rounded-lg">
+                  <p className="text-gray-400 mb-4">
+                    You haven't added any skills yet. Add skills to take
+                    assessments and track your progress.
+                  </p>
+
+                  <div className="flex gap-2 mb-4">
+                    <input
+                      type="text"
+                      value={newSkill}
+                      onChange={(e) => setNewSkill(e.target.value)}
+                      onKeyPress={(e) => e.key === "Enter" && handleAddSkill()}
+                      placeholder="Enter a skill (e.g., JavaScript, Python)"
+                      className="flex-grow px-4 py-3 bg-[#0D1117] text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-[#E31D65]"
+                    />
                     <button
-                      onClick={() => handleTakeAssessment(skill.id)}
-                      className="w-full mt-2 py-2 px-4 bg-gradient-to-r from-[#E31D65] to-[#FF6B2B] text-white rounded-lg hover:opacity-90 transition-opacity"
+                      onClick={handleAddSkill}
+                      className="px-4 py-3 bg-[#1F2937] text-white rounded-lg hover:bg-[#2D3748] flex items-center"
                     >
-                      Take Assessment
+                      <PlusCircle className="h-5 w-5 mr-2" />
+                      Add
                     </button>
-                  )}
+                  </div>
+
+                  <button
+                    onClick={saveSkills}
+                    disabled={profile.skills.length === 0 || isSaving}
+                    className={`w-full px-4 py-3 rounded-lg flex items-center justify-center ${
+                      profile.skills.length === 0 || isSaving
+                        ? "bg-gray-600 cursor-not-allowed"
+                        : "bg-gradient-to-r from-[#E31D65] to-[#FF6B2B] hover:opacity-90"
+                    } text-white transition-all duration-200`}
+                  >
+                    {isSaving ? (
+                      <>
+                        <div className="animate-spin h-5 w-5 mr-2 border-2 border-white border-t-transparent rounded-full"></div>
+                        Saving...
+                      </>
+                    ) : (
+                      <>Save Skills</>
+                    )}
+                  </button>
                 </div>
-              ))}
-            </div>
+              </div>
+            )}
           </div>
 
           {/* Career Path Card */}

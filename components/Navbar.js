@@ -185,12 +185,25 @@ export function Navbar() {
           <div className="flex items-center">
             {session ? (
               <>
-                <a
-                  href={
-                    session.user.profileCompleted
-                      ? "/profile"
-                      : "/complete-profile"
-                  }
+                <Link
+                  href="#"
+                  onClick={async (e) => {
+                    e.preventDefault();
+                    try {
+                      const response = await fetch(
+                        `/api/get-user?email=${session.user.email}`
+                      );
+                      const userData = await response.json();
+                      if (userData && userData.username) {
+                        router.push("/profile");
+                      } else {
+                        router.push("/complete-profile");
+                      }
+                    } catch (error) {
+                      console.error("Error checking profile:", error);
+                      router.push("/complete-profile");
+                    }
+                  }}
                 >
                   <button className="text-gray-300 hover:text-white p-1 rounded-full hover:bg-gray-900 transition-colors duration-200">
                     <img
@@ -199,7 +212,7 @@ export function Navbar() {
                       className="h-11 w-11 m-3 rounded-full object-cover"
                     />
                   </button>
-                </a>
+                </Link>
                 <button
                   onClick={handleSignOut}
                   disabled={isLoggingOut}
@@ -210,7 +223,7 @@ export function Navbar() {
               </>
             ) : (
               <button
-                onClick={() => signIn("google")}
+                onClick={() => router.push("/auth/signin")}
                 className="inline-flex items-center px-4 py-2 border border-transparent text-base font-medium rounded-md text-white bg-gradient-to-r from-[#E31D65] to-[#FF6B2B] hover:opacity-90 transition-opacity duration-200"
               >
                 Login
@@ -248,25 +261,24 @@ export function Navbar() {
                 </Link>
 
                 {session && (
-                <Link
-                  href="/counseling"
-                  className="text-gray-300 hover:bg-gray-900 hover:text-white block px-3 py-2 rounded-md text-base font-medium transition-colors duration-200"
-                  onClick={() => setIsMobileMenuOpen(false)}
-                >
-                  Career Counseling
-                </Link>
+                  <Link
+                    href="/counseling"
+                    className="text-gray-300 hover:bg-gray-900 hover:text-white block px-3 py-2 rounded-md text-base font-medium transition-colors duration-200"
+                    onClick={() => setIsMobileMenuOpen(false)}
+                  >
+                    Career Counseling
+                  </Link>
                 )}
 
                 {session && (
-                <Link
-                  href="/interview-landing"
-                  className="text-gray-300 hover:bg-gray-900 hover:text-white block px-3 py-2 rounded-md text-base font-medium transition-colors duration-200"
-                  onClick={() => setIsMobileMenuOpen(false)}
-                >
-                  Interviewer
-                </Link>
+                  <Link
+                    href="/interview-landing"
+                    className="text-gray-300 hover:bg-gray-900 hover:text-white block px-3 py-2 rounded-md text-base font-medium transition-colors duration-200"
+                    onClick={() => setIsMobileMenuOpen(false)}
+                  >
+                    Interviewer
+                  </Link>
                 )}
-
 
                 {/* <button
                   onClick={() => handleNavigation("/counseling")}
