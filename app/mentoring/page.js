@@ -231,7 +231,7 @@ export default function MentoringPage() {
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ duration: 0.5 }}
-                  className="bg-[#0D1117] rounded-lg overflow-hidden shadow-lg"
+                  className="bg-[#0D1117] rounded-lg overflow-hidden shadow-lg flex flex-col h-full"
                 >
                   <div className="h-48 bg-gray-700 relative">
                     <div className="absolute inset-0 flex items-center justify-center">
@@ -261,7 +261,7 @@ export default function MentoringPage() {
                     )}
                   </div>
 
-                  <div className="p-6">
+                  <div className="p-6 flex-1 flex flex-col">
                     <h3 className="text-xl font-bold text-white mb-1">
                       {mentor.name}
                     </h3>
@@ -308,17 +308,19 @@ export default function MentoringPage() {
 
                     <p className="text-gray-400 text-sm mb-6">{mentor.bio}</p>
 
-                    <button
-                      onClick={() => handleBookSession(mentor.id)}
-                      disabled={!mentor.available}
-                      className={`w-full py-3 rounded-md font-medium transition-all duration-300 ${
-                        mentor.available
-                          ? "bg-gradient-to-r from-[#E31D65] to-[#FF6B2B] text-white hover:opacity-90"
-                          : "bg-gray-700 text-gray-400 cursor-not-allowed"
-                      }`}
-                    >
-                      {mentor.available ? "Book Now" : "Currently Unavailable"}
-                    </button>
+                    <div className="mt-auto">
+                      <button
+                        onClick={() => handleBookSession(mentor.id)}
+                        disabled={!mentor.available}
+                        className={`w-full py-3 rounded-md font-medium transition-all duration-300 ${
+                          mentor.available
+                            ? "bg-gradient-to-r from-[#E31D65] to-[#FF6B2B] text-white hover:opacity-90"
+                            : "bg-gray-700 text-gray-400 cursor-not-allowed"
+                        }`}
+                      >
+                        {mentor.available ? "Book Now" : "Currently Unavailable"}
+                      </button>
+                    </div>
                   </div>
                 </motion.div>
               ))}
