@@ -141,6 +141,10 @@ const BentoGrid = () => {
   };
 
   const getFeatureRoute = (featureId) => {
+    // Special case for Beginner Guide (id: 5) - accessible to all
+    if (featureId === 5) return "/beginners";
+
+    // For all other features, require sign-in
     if (!user) return "/auth/signin";
 
     switch (featureId) {
@@ -152,8 +156,6 @@ const BentoGrid = () => {
         return "/cover-letter";
       case 4:
         return "/counseling";
-      case 5:
-        return "/beginners";
       case 6:
         return "/profile";
       default:
@@ -321,7 +323,11 @@ const BentoGrid = () => {
                   onClick={() => navigateToFeature(selectedFeature.id)}
                   className="px-8 py-3 rounded-full bg-gradient-to-r from-[#E31D65] to-[#FF6B2B] text-white font-semibold text-lg transform transition-all duration-300 hover:scale-105 hover:shadow-lg hover:shadow-pink-500/30 focus:outline-none focus:ring-2 focus:ring-pink-500 focus:ring-opacity-50"
                 >
-                  {user ? "Get Started" : "Sign In to Continue"}
+                  {selectedFeature.id === 5
+                    ? "Get Started"
+                    : user
+                    ? "Get Started"
+                    : "Sign In to Continue"}
                 </button>
               </div>
             </motion.div>
