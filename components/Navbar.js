@@ -116,6 +116,12 @@ export function Navbar() {
                 Beginners
               </Link>
               <button
+                onClick={() => handleNavigation("/mentoring")}
+                className="text-gray-300 hover:bg-gray-900 hover:text-white px-3 py-2 rounded-md text-base font-medium transition-colors duration-200"
+              >
+                Mentoring
+              </button>
+              <button
                 onClick={() => handleNavigation("/counseling")}
                 className="text-gray-300 hover:bg-gray-900 hover:text-white px-3 py-2 rounded-md text-base font-medium transition-colors duration-200"
               >
@@ -259,6 +265,16 @@ export function Navbar() {
                 >
                   Beginners
                 </Link>
+
+                {session && (
+                  <Link
+                    href="/mentoring"
+                    className="text-gray-300 hover:bg-gray-900 hover:text-white block px-3 py-2 rounded-md text-base font-medium transition-colors duration-200"
+                    onClick={() => setIsMobileMenuOpen(false)}
+                  >
+                    Mentoring
+                  </Link>
+                )}
 
                 {session && (
                   <Link
