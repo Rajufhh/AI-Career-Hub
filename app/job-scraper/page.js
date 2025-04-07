@@ -4,6 +4,7 @@
 
 import { useState } from "react";
 import { Search, Loader2 } from "lucide-react";
+import { ProtectedRoute } from "@/services/routeProtectionService";
 
 export default function JobScraper() {
   const [query, setQuery] = useState("Blockchain developers");
@@ -114,6 +115,7 @@ export default function JobScraper() {
   };
 
   return (
+    <ProtectedRoute>
     <div className="min-h-screen bg-[#0D1117] text-white p-8">
       <div className="max-w-6xl mx-auto">
         <h1 className="text-4xl font-bold mb-2 bg-gradient-to-r pb-3 from-[#E31D65] to-[#FF6B2B] text-transparent bg-clip-text">
@@ -280,5 +282,6 @@ export default function JobScraper() {
         )}
       </div>
     </div>
+    </ProtectedRoute>
   );
 }
