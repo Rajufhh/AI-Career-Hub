@@ -16,6 +16,7 @@ import {
   Check,
   ArrowRight,
   PlayCircle,
+  Trash2, // Adding the trash icon
 } from "lucide-react";
 import { ProtectedRoute } from "@/services/routeProtectionService";
 import ChatbotController from "@/components/ChatbotController";
@@ -31,7 +32,7 @@ export default function Dashboard() {
 
   const [activeTab, setActiveTab] = useState("starting-out");
   const [skills, setSkills] = useState([]);
-  const [savedSkills, setSavedSkills] = useState([]); // Add this to track saved skills separately
+  const [savedSkills, setSavedSkills] = useState([]);
   const [newSkill, setNewSkill] = useState("");
   const [skillsSaved, setSkillsSaved] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
@@ -213,8 +214,8 @@ export default function Dashboard() {
   return (
     <ProtectedRoute>
       <div className="min-h-screen bg-[#0D1117] px-4 flex flex-col">
-        <main className="flex-grow container mx-auto px-4 py-16">
-          <h1 className="text-4xl font-bold mb-8 text-transparent bg-clip-text bg-gradient-to-r from-[#E31D65] to-[#FF6B2B]">
+        <main className="flex-grow container mx-auto px-2 sm:px-4 py-16">
+          <h1 className="text-3xl sm:text-4xl font-bold mb-8 text-transparent bg-clip-text bg-gradient-to-r from-[#E31D65] to-[#FF6B2B]">
             Welcome to your Dashboard, {session.user?.name}!
           </h1>
 
@@ -250,14 +251,14 @@ export default function Dashboard() {
           {activeTab === "starting-out" && (
             <div className="flex flex-col lg:flex-row gap-8">
               {/* Skill Assessment Box */}
-              <div className="bg-[#161B22] p-6 rounded-lg shadow-md flex-1 relative overflow-hidden">
+              <div className="bg-[#161B22] p-4 sm:p-6 rounded-lg shadow-md flex-1 relative overflow-hidden">
                 <div className="absolute top-0 right-0 w-24 h-24 bg-gradient-to-br from-[#E31D65] to-[#FF6B2B] opacity-10 rounded-bl-full"></div>
 
                 <div className="flex items-center mb-6">
                   <div className="bg-gradient-to-r from-[#E31D65] to-[#FF6B2B] rounded-full w-10 h-10 flex items-center justify-center text-white font-bold">
                     1
                   </div>
-                  <h2 className="text-2xl font-semibold ml-4 text-white">
+                  <h2 className="text-xl sm:text-2xl font-semibold ml-4 text-white">
                     Skill Assessments
                   </h2>
                 </div>
@@ -286,7 +287,7 @@ export default function Dashboard() {
                               ) : (
                                 <button
                                   onClick={() => takeTest(skill)}
-                                  className="mr-2 px-3 py-1 bg-gradient-to-r from-[#E31D65] to-[#FF6B2B] text-white rounded-md hover:opacity-90 flex items-center"
+                                  className="mr-2 px-2 sm:px-3 py-1 bg-gradient-to-r from-[#E31D65] to-[#FF6B2B] text-white rounded-md hover:opacity-90 flex items-center text-xs sm:text-sm"
                                 >
                                   <PlayCircle className="h-4 w-4 mr-1" />
                                   Take Test
@@ -294,12 +295,13 @@ export default function Dashboard() {
                               )}
                             </>
                           )}
-                          {/* Allow removing a skill regardless of save status */}
+                          {/* Use trash icon instead of × for removing skills */}
                           <button
                             onClick={() => removeSkill(skill)}
-                            className="text-gray-400 hover:text-white"
+                            className="text-gray-400 hover:text-white p-1"
+                            aria-label="Delete skill"
                           >
-                            ×
+                            <Trash2 className="h-4 w-4" />
                           </button>
                         </div>
                       </div>
@@ -307,18 +309,18 @@ export default function Dashboard() {
                   </div>
                 )}
 
-                <div className="flex gap-2 mb-6">
+                <div className="flex flex-col sm:flex-row gap-2 mb-6">
                   <input
                     type="text"
                     value={newSkill}
                     onChange={(e) => setNewSkill(e.target.value)}
                     onKeyDown={(e) => e.key === "Enter" && addSkill()}
-                    placeholder="Enter a skill (e.g., JavaScript, Python)"
-                    className="flex-grow px-4 py-3 bg-[#0D1117] text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-[#E31D65]"
+                    placeholder="Enter a skill (e.g., JavaScript)"
+                    className="flex-grow px-3 py-2 sm:px-4 sm:py-3 bg-[#0D1117] text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-[#E31D65] text-sm sm:text-base"
                   />
                   <button
                     onClick={addSkill}
-                    className="px-4 py-3 bg-[#1F2937] text-white rounded-lg hover:bg-[#2D3748] flex items-center"
+                    className="px-4 py-2 sm:py-3 bg-[#1F2937] text-white rounded-lg hover:bg-[#2D3748] flex items-center justify-center"
                   >
                     <PlusCircle className="h-5 w-5 mr-2" />
                     Add
@@ -328,7 +330,7 @@ export default function Dashboard() {
                 <button
                   onClick={saveSkills}
                   disabled={!hasSkillChanges() || isSaving}
-                  className={`w-full px-4 py-3 rounded-lg flex items-center justify-center ${
+                  className={`w-full px-4 py-2 sm:py-3 rounded-lg flex items-center justify-center ${
                     !hasSkillChanges() || isSaving
                       ? "bg-gray-600 cursor-not-allowed"
                       : skillsSaved
@@ -367,14 +369,14 @@ export default function Dashboard() {
               </div>
 
               {/* Career Counseling Box - Now with fixed height and width */}
-              <div className="bg-[#161B22] p-6 rounded-lg shadow-md lg:w-[450px] lg:self-start relative overflow-hidden h-fit">
+              <div className="bg-[#161B22] p-4 sm:p-6 rounded-lg shadow-md lg:w-[450px] lg:self-start relative overflow-hidden h-fit">
                 <div className="absolute top-0 right-0 w-24 h-24 bg-gradient-to-br from-[#E31D65] to-[#FF6B2B] opacity-10 rounded-bl-full"></div>
 
                 <div className="flex items-center mb-6">
                   <div className="bg-gradient-to-r from-[#E31D65] to-[#FF6B2B] rounded-full w-10 h-10 flex items-center justify-center text-white font-bold">
                     2
                   </div>
-                  <h2 className="text-2xl font-semibold ml-4 text-white">
+                  <h2 className="text-xl sm:text-2xl font-semibold ml-4 text-white">
                     Career Counseling
                   </h2>
                 </div>
@@ -386,12 +388,12 @@ export default function Dashboard() {
                 </p>
 
                 <div className="flex items-center mb-6 p-4 bg-[#0D1117] rounded-lg border border-[#1F2937]">
-                  <BarChart className="h-10 w-10 text-[#E31D65] mr-4" />
+                  <BarChart className="h-8 w-8 sm:h-10 sm:w-10 text-[#E31D65] mr-4" />
                   <div>
                     <h3 className="text-white font-medium">
                       Data-Driven Insights
                     </h3>
-                    <p className="text-gray-400 text-sm">
+                    <p className="text-gray-400 text-xs sm:text-sm">
                       Get career recommendations based on your assessment
                       results and market trends
                     </p>
@@ -400,7 +402,7 @@ export default function Dashboard() {
 
                 <button
                   onClick={() => handleCardClick("/counseling")}
-                  className={`w-full px-4 py-3 ${
+                  className={`w-full px-4 py-2 sm:py-3 ${
                     allSkillsAssessed
                       ? "bg-gradient-to-r from-[#E31D65] to-[#FF6B2B] hover:opacity-90"
                       : "bg-gray-600 cursor-not-allowed"
@@ -409,7 +411,7 @@ export default function Dashboard() {
                 >
                   <span>Get Career Counseling</span>
                   {!allSkillsAssessed && (
-                    <span className="ml-2 text-sm">
+                    <span className="ml-2 text-xs sm:text-sm">
                       (Complete All Assessments First)
                     </span>
                   )}

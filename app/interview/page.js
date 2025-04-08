@@ -3,6 +3,8 @@ import React, { useState, useRef, useEffect, Suspense } from "react";
 import { useSearchParams } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import MarkdownIt from "markdown-it";
+import Loader from "@/components/Loader";
+
 import {
   Camera,
   AlertTriangle,
@@ -249,15 +251,12 @@ const Interview = () => {
   };
 
   // Loading state
+  // Import the Loader component
+ 
+  
+  // Then in your component where you check for loading:
   if (loading) {
-    return (
-      <div className="min-h-screen bg-[#0D1117] flex flex-col items-center justify-center space-y-4">
-        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-white"></div>
-        <div className="text-white text-xl">
-          Preparing your {role} interview...
-        </div>
-      </div>
-    );
+    return <Loader message="Preparing your interview" />;
   }
 
   // Error state
