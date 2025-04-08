@@ -13,6 +13,7 @@ export default function MentoringPage() {
   const [selectedTime, setSelectedTime] = useState(null);
   const [currentMonth, setCurrentMonth] = useState(new Date());
   const [timeSlots, setTimeSlots] = useState([]);
+  const [loading, setLoading] = useState(true);
   const [bookingStatus, setBookingStatus] = useState({
     isBooked: false,
     meetLink: "",
@@ -22,6 +23,15 @@ export default function MentoringPage() {
 
   // Use a ref to store generated time slots for each date to ensure consistency
   const timeSlotsCache = useRef({});
+
+  // Add loading effect on initial render
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setLoading(false);
+    }, 3500); // 3.5 seconds
+
+    return () => clearTimeout(timer);
+  }, []);
 
   // Generate time slots (9 AM to 5 PM, 30-minute intervals)
   const generateTimeSlots = (date) => {
@@ -148,7 +158,7 @@ export default function MentoringPage() {
 
       const mentorEmail = `${mentor.name
         .toLowerCase()
-        .replace(/\s+/g, ".")}@ai.career.hub.com`;
+        .replace(/\s+/g, ".")}@example.com`;
 
       // Update booking status
       setBookingStatus({
@@ -240,209 +250,263 @@ export default function MentoringPage() {
     );
   };
 
+  // Day abbreviations with unique keys
+  const dayAbbreviations = [
+    { key: "sun", label: "S" },
+    { key: "mon", label: "M" },
+    { key: "tue", label: "T" },
+    { key: "wed", label: "W" },
+    { key: "thu", label: "Th" },
+    { key: "fri", label: "F" },
+    { key: "sat", label: "Sa" },
+  ];
+
   return (
     <ProtectedRoute>
       <div className="bg-[#161B22] min-h-screen py-12 px-4 sm:px-6 lg:px-8">
         <div className="max-w-7xl mx-auto">
-          <div className="text-center mb-12">
-            <h1 className="text-3xl sm:text-4xl md:text-5xl font-bold mb-4">
-              <span className="bg-gradient-to-r from-[#E31D65] to-[#FF6B2B] text-transparent bg-clip-text">
-                1:1 Mentoring Sessions
-              </span>
-            </h1>
-            <p className="text-gray-300 max-w-3xl mx-auto text-lg">
-              Connect with industry experts for personalized guidance on your
-              career journey. Book a 30-minute session with one of our
-              experienced mentors.
-            </p>
-          </div>
-
-          {bookingStatus.isBooked ? (
-            <div className="max-w-2xl mx-auto bg-[#0D1117] p-8 rounded-lg shadow-lg border-2 border-gradient-to-r from-[#E31D65] to-[#FF6B2B]">
-              <div className="text-center">
-                <motion.div
-                  initial={{ scale: 0.8, opacity: 0 }}
-                  animate={{ scale: 1, opacity: 1 }}
-                  transition={{ duration: 0.5 }}
-                  className="mb-6"
+          {loading ? (
+            <div className="flex flex-col items-center justify-center h-[70vh]">
+              <div className="w-16 h-16 mb-8">
+                <svg
+                  className="animate-spin h-16 w-16 text-[#E31D65]"
+                  xmlns="http://www.w3.org/2000/svg"
+                  fill="none"
+                  viewBox="0 0 24 24"
                 >
-                  <div className="w-20 h-20 bg-gradient-to-r from-[#E31D65] to-[#FF6B2B] rounded-full flex items-center justify-center mx-auto">
-                    <svg
-                      xmlns="http://www.w3.org/2000/svg"
-                      className="h-10 w-10 text-white"
-                      fill="none"
-                      viewBox="0 0 24 24"
-                      stroke="currentColor"
-                    >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth={2}
-                        d="M5 13l4 4L19 7"
-                      />
-                    </svg>
-                  </div>
-                </motion.div>
-
-                <h2 className="text-2xl font-bold text-white mb-4">
-                  Session Booked Successfully!
-                </h2>
-                <p className="text-gray-300 mb-6">
-                  Your mentoring session has been scheduled. Here are the
-                  details:
-                </p>
-
-                <div className="bg-[#161B22] p-6 rounded-lg mb-6">
-                  <div className="flex items-center mb-4">
-                    <Calendar className="h-5 w-5 text-[#E31D65] mr-3" />
-                    <span className="text-gray-300">
-                      <span className="font-medium text-white">
-                        Scheduled for:
-                      </span>{" "}
-                      {bookingStatus.scheduledTime}
-                    </span>
-                  </div>
-
-                  <div className="flex items-center mb-4">
-                    <Clock className="h-5 w-5 text-[#E31D65] mr-3" />
-                    <span className="text-gray-300">
-                      <span className="font-medium text-white">Duration:</span>{" "}
-                      30 minutes
-                    </span>
-                  </div>
-
-                  <div className="flex items-center mb-4">
-                    <Mail className="h-5 w-5 text-[#E31D65] mr-3" />
-                    <span className="text-gray-300">
-                      <span className="font-medium text-white">
-                        Mentor email:
-                      </span>{" "}
-                      {bookingStatus.mentorEmail}
-                    </span>
-                  </div>
-
-                  <div className="flex items-center">
-                    <ExternalLink className="h-5 w-5 text-[#E31D65] mr-3" />
-                    <span className="text-gray-300">
-                      <span className="font-medium text-white">
-                        Meeting link:
-                      </span>{" "}
-                      <a
-                        href={bookingStatus.meetLink}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="text-[#FF6B2B] hover:underline"
-                      >
-                        {bookingStatus.meetLink}
-                      </a>
-                    </span>
-                  </div>
-                </div>
-
-                <p className="text-gray-400 text-sm">
-                  The meeting link has been sent to both you and your mentor via
-                  email. Please join the meeting at the scheduled time.
-                </p>
-
-                <div className="mt-8">
-                  <Link href="/dashboard">
-                    <button className="px-6 py-3 bg-[#0D1117] text-white rounded-md hover:bg-gradient-to-r hover:from-[#E31D65] hover:to-[#FF6B2B] transition-colors duration-300">
-                      Back to Dashboard
-                    </button>
-                  </Link>
-                </div>
+                  <circle
+                    className="opacity-25"
+                    cx="12"
+                    cy="12"
+                    r="10"
+                    stroke="currentColor"
+                    strokeWidth="4"
+                  ></circle>
+                  <path
+                    className="opacity-75"
+                    fill="currentColor"
+                    d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                  ></path>
+                </svg>
               </div>
+              <h2 className="text-2xl font-bold text-white mb-2 text-center">
+                <span className="bg-gradient-to-r from-[#E31D65] to-[#FF6B2B] text-transparent bg-clip-text">
+                  Finding the best mentors
+                </span>
+              </h2>
+              <p className="text-gray-300 text-lg text-center">
+                tailored to your profile...
+              </p>
             </div>
           ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
-              {mentors.map((mentor) => (
-                <motion.div
-                  key={mentor.id}
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.5 }}
-                  className="bg-[#0D1117] rounded-lg overflow-hidden shadow-lg"
-                >
-                  <div className="h-48 bg-gray-700 relative">
-                    <div className="absolute inset-0 flex items-center justify-center">
-                      {mentor.image ? (
-                        <img
-                          src={mentor.image}
-                          alt={mentor.name}
-                          className="w-full h-full object-cover"
-                          onError={(e) => {
-                            e.target.onerror = null;
-                            e.target.src =
-                              "https://via.placeholder.com/300x200?text=Mentor";
-                          }}
-                        />
-                      ) : (
-                        <div className="w-24 h-24 bg-gray-600 rounded-full flex items-center justify-center">
-                          <span className="text-3xl font-bold text-gray-300">
-                            {mentor.name.charAt(0)}
-                          </span>
-                        </div>
-                      )}
-                    </div>
-                  </div>
+            <>
+              <div className="text-center mb-12">
+                <h1 className="text-3xl sm:text-4xl md:text-5xl font-bold mb-4">
+                  <span className="bg-gradient-to-r from-[#E31D65] to-[#FF6B2B] text-transparent bg-clip-text">
+                    1:1 Mentoring Sessions
+                  </span>
+                </h1>
+                <p className="text-gray-300 max-w-3xl mx-auto text-lg">
+                  Connect with industry experts tailored according to your
+                  profile for personalized guidance on your career journey. Book
+                  a 30-minute session with one of our experienced mentors.
+                </p>
+              </div>
 
-                  <div className="p-6">
-                    <h3 className="text-xl font-bold text-white mb-1">
-                      {mentor.name}
-                    </h3>
-                    <p className="text-gray-400 text-sm mb-3">{mentor.role}</p>
+              {bookingStatus.isBooked ? (
+                <div className="max-w-2xl mx-auto bg-[#0D1117] p-8 rounded-lg shadow-lg border-2 border-gradient-to-r from-[#E31D65] to-[#FF6B2B]">
+                  <div className="text-center">
+                    <motion.div
+                      initial={{ scale: 0.8, opacity: 0 }}
+                      animate={{ scale: 1, opacity: 1 }}
+                      transition={{ duration: 0.5 }}
+                      className="mb-6"
+                    >
+                      <div className="w-20 h-20 bg-gradient-to-r from-[#E31D65] to-[#FF6B2B] rounded-full flex items-center justify-center mx-auto">
+                        <svg
+                          xmlns="http://www.w3.org/2000/svg"
+                          className="h-10 w-10 text-white"
+                          fill="none"
+                          viewBox="0 0 24 24"
+                          stroke="currentColor"
+                        >
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            strokeWidth={2}
+                            d="M5 13l4 4L19 7"
+                          />
+                        </svg>
+                      </div>
+                    </motion.div>
 
-                    <div className="flex items-center mb-4">
-                      <div className="flex text-yellow-400">
-                        {[...Array(5)].map((_, i) => (
-                          <svg
-                            key={i}
-                            xmlns="http://www.w3.org/2000/svg"
-                            className={`h-4 w-4 ${
-                              i < Math.floor(mentor.rating)
-                                ? "text-yellow-400"
-                                : "text-gray-600"
-                            }`}
-                            viewBox="0 0 20 20"
-                            fill="currentColor"
+                    <h2 className="text-2xl font-bold text-white mb-4">
+                      Session Booked Successfully!
+                    </h2>
+                    <p className="text-gray-300 mb-6">
+                      Your mentoring session has been scheduled. Here are the
+                      details:
+                    </p>
+
+                    <div className="bg-[#161B22] p-6 rounded-lg mb-6">
+                      <div className="flex items-center mb-4">
+                        <Calendar className="h-5 w-5 text-[#E31D65] mr-3" />
+                        <span className="text-gray-300">
+                          <span className="font-medium text-white">
+                            Scheduled for:
+                          </span>{" "}
+                          {bookingStatus.scheduledTime}
+                        </span>
+                      </div>
+
+                      <div className="flex items-center mb-4">
+                        <Clock className="h-5 w-5 text-[#E31D65] mr-3" />
+                        <span className="text-gray-300">
+                          <span className="font-medium text-white">
+                            Duration:
+                          </span>{" "}
+                          30 minutes
+                        </span>
+                      </div>
+
+                      <div className="flex items-center mb-4">
+                        <Mail className="h-5 w-5 text-[#E31D65] mr-3" />
+                        <span className="text-gray-300">
+                          <span className="font-medium text-white">
+                            Mentor email:
+                          </span>{" "}
+                          {bookingStatus.mentorEmail}
+                        </span>
+                      </div>
+
+                      <div className="flex items-center">
+                        <ExternalLink className="h-5 w-5 text-[#E31D65] mr-3" />
+                        <span className="text-gray-300">
+                          <span className="font-medium text-white">
+                            Meeting link:
+                          </span>{" "}
+                          <a
+                            href={bookingStatus.meetLink}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="text-[#FF6B2B] hover:underline"
                           >
-                            <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
-                          </svg>
-                        ))}
-                        <span className="ml-1 text-gray-300 text-sm">
-                          {mentor.rating}
+                            {bookingStatus.meetLink}
+                          </a>
                         </span>
                       </div>
                     </div>
 
-                    <div className="mb-4">
-                      <h4 className="text-sm font-medium text-gray-300 mb-2">
-                        Expertise:
-                      </h4>
-                      <div className="flex flex-wrap gap-2">
-                        {mentor.expertise.map((skill, index) => (
-                          <span
-                            key={index}
-                            className="bg-[#1c2331] text-gray-300 text-xs px-2 py-1 rounded-full"
-                          >
-                            {skill}
-                          </span>
-                        ))}
-                      </div>
+                    <p className="text-gray-400 text-sm">
+                      The meeting link has been sent to both you and your mentor
+                      via email. Please join the meeting at the scheduled time.
+                    </p>
+
+                    <div className="mt-8">
+                      <Link href="/dashboard">
+                        <button className="px-6 py-3 bg-[#0D1117] text-white rounded-md hover:bg-gradient-to-r hover:from-[#E31D65] hover:to-[#FF6B2B] transition-colors duration-300">
+                          Back to Dashboard
+                        </button>
+                      </Link>
                     </div>
-
-                    <p className="text-gray-400 text-sm mb-6">{mentor.bio}</p>
-
-                    <button
-                      onClick={() => openBookingModal(mentor)}
-                      className="w-full py-3 rounded-md font-medium transition-all duration-300 bg-gradient-to-r from-[#E31D65] to-[#FF6B2B] text-white hover:opacity-90"
-                    >
-                      Book Now
-                    </button>
                   </div>
-                </motion.div>
-              ))}
-            </div>
+                </div>
+              ) : (
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+                  {mentors.map((mentor) => (
+                    <motion.div
+                      key={mentor.id}
+                      initial={{ opacity: 0, y: 20 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ duration: 0.5 }}
+                      className="bg-[#0D1117] rounded-lg overflow-hidden shadow-lg"
+                    >
+                      <div className="h-48 bg-gray-700 relative">
+                        <div className="absolute inset-0 flex items-center justify-center">
+                          {mentor.image ? (
+                            <img
+                              src={mentor.image}
+                              alt={mentor.name}
+                              className="w-full h-full object-cover"
+                              onError={(e) => {
+                                e.target.onerror = null;
+                                e.target.src =
+                                  "https://via.placeholder.com/300x200?text=Mentor";
+                              }}
+                            />
+                          ) : (
+                            <div className="w-24 h-24 bg-gray-600 rounded-full flex items-center justify-center">
+                              <span className="text-3xl font-bold text-gray-300">
+                                {mentor.name.charAt(0)}
+                              </span>
+                            </div>
+                          )}
+                        </div>
+                      </div>
+
+                      <div className="p-6">
+                        <h3 className="text-xl font-bold text-white mb-1">
+                          {mentor.name}
+                        </h3>
+                        <p className="text-gray-400 text-sm mb-3">
+                          {mentor.role}
+                        </p>
+
+                        <div className="flex items-center mb-4">
+                          <div className="flex text-yellow-400">
+                            {[...Array(5)].map((_, i) => (
+                              <svg
+                                key={i}
+                                xmlns="http://www.w3.org/2000/svg"
+                                className={`h-4 w-4 ${
+                                  i < Math.floor(mentor.rating)
+                                    ? "text-yellow-400"
+                                    : "text-gray-600"
+                                }`}
+                                viewBox="0 0 20 20"
+                                fill="currentColor"
+                              >
+                                <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+                              </svg>
+                            ))}
+                            <span className="ml-1 text-gray-300 text-sm">
+                              {mentor.rating}
+                            </span>
+                          </div>
+                        </div>
+
+                        <div className="mb-4">
+                          <h4 className="text-sm font-medium text-gray-300 mb-2">
+                            Expertise:
+                          </h4>
+                          <div className="flex flex-wrap gap-2">
+                            {mentor.expertise.map((skill, index) => (
+                              <span
+                                key={index}
+                                className="bg-[#1c2331] text-gray-300 text-xs px-2 py-1 rounded-full"
+                              >
+                                {skill}
+                              </span>
+                            ))}
+                          </div>
+                        </div>
+
+                        <p className="text-gray-400 text-sm mb-6">
+                          {mentor.bio}
+                        </p>
+
+                        <button
+                          onClick={() => openBookingModal(mentor)}
+                          className="w-full py-3 rounded-md font-medium transition-all duration-300 bg-gradient-to-r from-[#E31D65] to-[#FF6B2B] text-white hover:opacity-90"
+                        >
+                          Book Now
+                        </button>
+                      </div>
+                    </motion.div>
+                  ))}
+                </div>
+              )}
+            </>
           )}
         </div>
 
@@ -458,32 +522,32 @@ export default function MentoringPage() {
               initial={{ opacity: 0, scale: 0.9 }}
               animate={{ opacity: 1, scale: 1 }}
               exit={{ opacity: 0, scale: 0.9 }}
-              className="bg-[#0D1117] rounded-lg p-6 max-w-4xl w-full mx-4 z-10 relative"
+              className="bg-[#0D1117] rounded-lg p-4 sm:p-6 max-w-4xl w-full mx-4 z-10 relative max-h-[90vh] overflow-y-auto"
             >
               <button
                 onClick={closeBookingModal}
-                className="absolute top-4 right-4 text-gray-400 hover:text-white"
+                className="absolute top-3 right-3 text-gray-400 hover:text-white z-10"
               >
                 <X size={24} />
               </button>
 
-              <h2 className="text-2xl font-bold text-white mb-6 flex items-center">
+              <h2 className="text-xl sm:text-2xl font-bold text-white mb-4 sm:mb-6 flex items-center pr-8">
                 <span className="bg-gradient-to-r from-[#E31D65] to-[#FF6B2B] text-transparent bg-clip-text">
                   Book a Session with {selectedMentor?.name || "Mentor"}
                 </span>
               </h2>
 
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                {/* Calendar */}
-                <div className="bg-[#161B22] p-4 rounded-lg">
-                  <div className="flex justify-between items-center mb-4">
+              <div className="flex flex-col md:grid md:grid-cols-2 gap-4 md:gap-6">
+                {/* Calendar - Smaller on mobile */}
+                <div className="bg-[#161B22] p-2 sm:p-4 rounded-lg">
+                  <div className="flex justify-between items-center mb-2 sm:mb-4">
                     <button
                       onClick={prevMonth}
                       className="text-gray-400 hover:text-white"
                     >
                       &lt;
                     </button>
-                    <h3 className="text-white font-medium">
+                    <h3 className="text-white font-medium text-sm sm:text-base">
                       {currentMonth.toLocaleString("default", {
                         month: "long",
                         year: "numeric",
@@ -497,17 +561,15 @@ export default function MentoringPage() {
                     </button>
                   </div>
 
-                  <div className="grid grid-cols-7 gap-1 mb-2">
-                    {["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"].map(
-                      (day) => (
-                        <div
-                          key={day}
-                          className="text-center text-gray-400 text-sm py-1"
-                        >
-                          {day}
-                        </div>
-                      )
-                    )}
+                  <div className="grid grid-cols-7 gap-1 mb-1 sm:mb-2">
+                    {dayAbbreviations.map((day) => (
+                      <div
+                        key={day.key}
+                        className="text-center text-gray-400 text-xs sm:text-sm py-1"
+                      >
+                        {day.label}
+                      </div>
+                    ))}
                   </div>
 
                   <div className="grid grid-cols-7 gap-1">
@@ -517,7 +579,7 @@ export default function MentoringPage() {
                         currentMonth.getMonth()
                       ),
                     }).map((_, index) => (
-                      <div key={`empty-${index}`} className="h-10"></div>
+                      <div key={`empty-${index}`} className="h-8 sm:h-10"></div>
                     ))}
 
                     {Array.from({
@@ -547,7 +609,7 @@ export default function MentoringPage() {
                               : null
                           }
                           disabled={isPastOrTodayDate || isWeekend}
-                          className={`h-10 rounded-md flex items-center justify-center text-sm transition-colors ${
+                          className={`h-8 sm:h-10 rounded-md flex items-center justify-center text-xs sm:text-sm transition-colors ${
                             isSelected
                               ? "bg-gradient-to-r from-[#E31D65] to-[#FF6B2B] text-white"
                               : isToday
@@ -564,16 +626,16 @@ export default function MentoringPage() {
                   </div>
                 </div>
 
-                {/* Time Slots */}
-                <div className="bg-[#161B22] p-4 rounded-lg">
-                  <h3 className="text-white font-medium mb-4">
+                {/* Time Slots - More compact on mobile */}
+                <div className="bg-[#161B22] p-2 sm:p-4 rounded-lg">
+                  <h3 className="text-white font-medium mb-2 sm:mb-4 text-sm sm:text-base">
                     {selectedDate
                       ? `Available Times for ${selectedDate.toLocaleDateString()}`
                       : "Select a date to view available times"}
                   </h3>
 
                   {selectedDate ? (
-                    <div className="grid grid-cols-2 gap-2">
+                    <div className="grid grid-cols-2 sm:grid-cols-2 gap-1 sm:gap-2">
                       {timeSlots.map((slot, index) => (
                         <button
                           key={`time-${index}`}
@@ -581,7 +643,7 @@ export default function MentoringPage() {
                             slot.isAvailable ? setSelectedTime(slot.time) : null
                           }
                           disabled={!slot.isAvailable}
-                          className={`py-2 px-4 rounded-md text-sm transition-colors ${
+                          className={`py-1 sm:py-2 px-2 sm:px-4 rounded-md text-xs sm:text-sm transition-colors ${
                             selectedTime === slot.time
                               ? "bg-gradient-to-r from-[#E31D65] to-[#FF6B2B] text-white"
                               : slot.isAvailable
@@ -594,18 +656,24 @@ export default function MentoringPage() {
                       ))}
                     </div>
                   ) : (
-                    <div className="text-gray-400 text-center py-8">
+                    <div className="text-gray-400 text-center py-4 sm:py-8 text-sm">
                       Please select a date from the calendar
                     </div>
                   )}
                 </div>
               </div>
 
-              <div className="mt-8 flex justify-end">
+              <div className="mt-6 sm:mt-8 flex justify-between sm:justify-end">
+                <button
+                  onClick={closeBookingModal}
+                  className="px-3 py-2 sm:px-4 sm:py-2 bg-[#161B22] text-gray-300 rounded-md hover:bg-[#1c2331] mr-2 sm:mr-4 text-sm sm:text-base"
+                >
+                  Cancel
+                </button>
                 <button
                   onClick={handleBookSession}
                   disabled={!selectedDate || !selectedTime}
-                  className={`px-6 py-3 rounded-md font-medium transition-all duration-300 ${
+                  className={`px-3 py-2 sm:px-6 sm:py-3 rounded-md font-medium transition-all duration-300 text-sm sm:text-base ${
                     selectedDate && selectedTime
                       ? "bg-gradient-to-r from-[#E31D65] to-[#FF6B2B] text-white hover:opacity-90"
                       : "bg-gray-700 text-gray-400 cursor-not-allowed"
