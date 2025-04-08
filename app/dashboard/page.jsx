@@ -31,6 +31,7 @@ export default function Dashboard() {
 
   const [activeTab, setActiveTab] = useState("starting-out");
   const [skills, setSkills] = useState([]);
+  const [savedSkills, setSavedSkills] = useState([]); // Add this to track saved skills separately
   const [newSkill, setNewSkill] = useState("");
   const [skillsSaved, setSkillsSaved] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
@@ -59,7 +60,7 @@ export default function Dashboard() {
           // Set skills from user data if available
           if (data.skills && Array.isArray(data.skills)) {
             setSkills(data.skills);
-            // Don't set skillsSaved to true here, so users can always add skills
+            setSavedSkills(data.skills); // Initialize savedSkills with the fetched skills
           }
 
           // Check if all skills have been assessed
@@ -159,6 +160,7 @@ export default function Dashboard() {
 
       // Update the UI to show skills are saved
       setSkillsSaved(true);
+      setSavedSkills([...skills]); // Update the savedSkills array with current skills
 
       // Update userData with new skills immediately to keep UI consistent
       setUserData((prev) => ({
@@ -194,6 +196,18 @@ export default function Dashboard() {
       (score) => score.skill === skill
     );
     return scoreObj ? Math.round(scoreObj.score) : null;
+  };
+
+  // Check if skills have changed from saved state
+  const hasSkillChanges = () => {
+    if (skills.length !== savedSkills.length) return true;
+    return skills.some(skill => !savedSkills.includes(skill)) || 
+           savedSkills.some(skill => !skills.includes(skill));
+  };
+
+  // Check if a skill is saved and can be tested
+  const isSkillSaved = (skill) => {
+    return savedSkills.includes(skill);
   };
 
   return (
@@ -263,18 +277,22 @@ export default function Dashboard() {
                       >
                         <span className="text-white">{skill}</span>
                         <div className="flex items-center">
-                          {hasSkillScore(skill) ? (
-                            <span className="mr-2 px-3 py-1 bg-green-700 text-white rounded-md flex items-center">
-                              Score: {getSkillScore(skill)}%
-                            </span>
-                          ) : (
-                            <button
-                              onClick={() => takeTest(skill)}
-                              className="mr-2 px-3 py-1 bg-gradient-to-r from-[#E31D65] to-[#FF6B2B] text-white rounded-md hover:opacity-90 flex items-center"
-                            >
-                              <PlayCircle className="h-4 w-4 mr-1" />
-                              Take Test
-                            </button>
+                          {isSkillSaved(skill) && (
+                            <>
+                              {hasSkillScore(skill) ? (
+                                <span className="mr-2 px-3 py-1 bg-green-700 text-white rounded-md flex items-center">
+                                  Score: {getSkillScore(skill)}%
+                                </span>
+                              ) : (
+                                <button
+                                  onClick={() => takeTest(skill)}
+                                  className="mr-2 px-3 py-1 bg-gradient-to-r from-[#E31D65] to-[#FF6B2B] text-white rounded-md hover:opacity-90 flex items-center"
+                                >
+                                  <PlayCircle className="h-4 w-4 mr-1" />
+                                  Take Test
+                                </button>
+                              )}
+                            </>
                           )}
                           {/* Allow removing a skill regardless of save status */}
                           <button
@@ -309,9 +327,9 @@ export default function Dashboard() {
 
                 <button
                   onClick={saveSkills}
-                  disabled={skills.length === 0 || isSaving}
+                  disabled={!hasSkillChanges() || isSaving}
                   className={`w-full px-4 py-3 rounded-lg flex items-center justify-center ${
-                    skills.length === 0 || isSaving
+                    !hasSkillChanges() || isSaving
                       ? "bg-gray-600 cursor-not-allowed"
                       : skillsSaved
                       ? "bg-green-700"
