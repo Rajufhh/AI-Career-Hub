@@ -7,6 +7,8 @@ import { ProtectedRoute } from "@/services/routeProtectionService";
 import { MapPin, Book, Briefcase, ChevronRight, Trophy } from "lucide-react";
 import ChatbotController from "@/components/ChatbotController";
 
+import Loader from "@/components/Loader";
+
 export default function Profile() {
   const { data: session, status } = useSession();
   const [profile, setProfile] = useState(null);
@@ -91,12 +93,11 @@ export default function Profile() {
     }
   };
 
+  
+  
+  // Then replace the loading state (around line 76-80)
   if (status === "loading" || loading) {
-    return (
-      <div className="min-h-screen bg-[#0D1117] flex items-center justify-center">
-        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-white"></div>
-      </div>
-    );
+    return <Loader message="Loading your profile" />;
   }
 
   if (status === "unauthenticated") {

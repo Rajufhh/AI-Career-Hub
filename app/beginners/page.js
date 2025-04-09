@@ -5,6 +5,9 @@ import { Suspense } from "react";
 import { useSearchParams } from "next/navigation";
 import MarkdownIt from "markdown-it";
 import { Button } from "@/components/ui/button";
+import Loader from "@/components/Loader";
+
+
 import {
   CheckCircle,
   Loader2,
@@ -104,7 +107,7 @@ const CAREER_DOMAINS = [
 // This is the main page component that will be the default export
 export default function BeginnerAssessmentPage() {
   return (
-    <Suspense fallback={<LoadingState message="Loading assessment..." />}>
+    <Suspense fallback={<Loader message="Loading assessment..." />}>
       <BeginnerAssessment />
     </Suspense>
   );
@@ -350,7 +353,7 @@ function BeginnerAssessment() {
 
   // Loading state
   if (loading) {
-    return <LoadingState message={loadingMessage} />;
+    return <Loader message={loadingMessage} />;
   }
 
   // Error state

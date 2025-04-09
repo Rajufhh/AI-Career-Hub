@@ -14,6 +14,7 @@ import {
   StarHalf,
 } from "lucide-react";
 import { ProtectedRoute } from "@/services/routeProtectionService";
+import Loader from "@/components/Loader";
 
 const md = new MarkdownIt();
 
@@ -325,15 +326,10 @@ const ProctoredSkillTest = () => {
 
   // Loading state
   if (loading) {
-    return (
-      <div className="min-h-screen bg-[#0D1117] flex flex-col items-center justify-center space-y-4">
-        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-white"></div>
-        <div className="text-white text-xl">
-          Generating {skill} assessment...
-        </div>
-      </div>
-    );
+    return <Loader message={`Preparing your ${skill} assessment`} />;
   }
+
+  
 
   // Error state
   if (error) {

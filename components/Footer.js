@@ -235,7 +235,7 @@ export default function Footer() {
 
       <motion.button
         onClick={scrollToTop}
-        className={`fixed right-6 bottom-6 p-2 rounded-full bg-gradient-to-r from-[#E31D65] to-[#FF6B2B] text-white shadow-lg z-50 ${
+        className={`fixed left-6 bottom-6 p-2 rounded-full bg-gradient-to-r from-[#E31D65] to-[#FF6B2B] text-white shadow-lg z-50 ${
           isVisible ? "flex" : "hidden"
         }`}
         whileHover={{ scale: 1.05 }}
