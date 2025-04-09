@@ -106,20 +106,32 @@ export default function Home() {
 
           {analysis && (
             <div className="mt-6 p-6 bg-[#161B22] rounded-lg border border-[#E45A2E]">
-              <h2 className="text-2xl font-bold mb-4">Analysis Results</h2>
+              <h2 className="text-2xl font-bold mb-4 bg-gradient-to-r from-[#E31D65] to-[#FF6B2B] text-transparent bg-clip-text">
+                Analysis Results
+              </h2>
               <div
-                className="font-mono text-sm text-gray-300"
+                className="analysis-content prose prose-invert max-w-none"
                 dangerouslySetInnerHTML={{ __html: analysis }}
               />
 
-              {/* Added button to navigate to cover letter generator */}
-              <div className="mt-6">
-                <button
-                  onClick={() => router.push("/cover-letter")}
-                  className="w-full py-3 bg-gradient-to-r from-[#E31D65] to-[#FF6B2B] hover:opacity-90 duration-200 rounded-lg font-semibold"
-                >
-                  Generate a Cover Letter Based on Your Resume
-                </button>
+              <div className="mt-8 pt-6 border-t border-[#30363D]">
+                <h3 className="text-xl font-semibold mb-3 text-white">
+                  What's next?
+                </h3>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <button
+                    onClick={() => router.push("/cover-letter")}
+                    className="p-3 bg-gradient-to-r from-[#E31D65] to-[#FF6B2B] hover:opacity-90 rounded-lg text-white transition-colors flex items-center justify-center font-medium"
+                  >
+                    Generate Cover Letter
+                  </button>
+                  <button
+                    onClick={() => router.push("/linkedin-analyze")}
+                    className="p-3 bg-gradient-to-r from-[#E31D65] to-[#FF6B2B] hover:opacity-90 rounded-lg text-white transition-colors flex items-center justify-center font-medium"
+                  >
+                    Analyze LinkedIn Profile
+                  </button>
+                </div>
               </div>
             </div>
           )}

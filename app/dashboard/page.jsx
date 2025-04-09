@@ -16,6 +16,7 @@ import {
   Check,
   ArrowRight,
   PlayCircle,
+  Linkedin,
 } from "lucide-react";
 import { ProtectedRoute } from "@/services/routeProtectionService";
 import ChatbotController from "@/components/ChatbotController";
@@ -417,6 +418,12 @@ export default function Dashboard() {
                     <FileSpreadsheet className="h-8 w-8 text-primary-start" />
                   }
                   onClick={() => handleCardClick("/cover-letter")}
+                />
+                <DashboardCard
+                  title="LinkedIn Profile Analysis"
+                  description="Get feedback to improve your LinkedIn profile."
+                  icon={<Linkedin className="h-8 w-8 text-primary-start" />}
+                  onClick={() => handleCardClick("/linkedin-analyze")}
                 />
                 <DashboardCard
                   title="Job Scraper"

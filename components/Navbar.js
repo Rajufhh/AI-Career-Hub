@@ -165,6 +165,12 @@ export function Navbar() {
                         Cover Letter
                       </button>
                       <button
+                        onClick={() => handleNavigation("/linkedin-analyze")}
+                        className="block px-4 py-2 text-sm text-gray-300 hover:bg-gray-900 hover:text-white w-full text-center"
+                      >
+                        LinkedIn Analysis
+                      </button>
+                      <button
                         onClick={() => handleNavigation("/job-scraper")}
                         className="block px-4 py-2 text-sm text-gray-300 hover:bg-gray-900 hover:text-white w-full text-center"
                       >
@@ -323,6 +329,12 @@ export function Navbar() {
                     className="text-gray-300 hover:bg-gray-900 hover:text-white block px-3 py-2 rounded-md text-sm font-medium transition-colors duration-200 w-full text-center"
                   >
                     Cover Letter
+                  </button>
+                  <button
+                    onClick={() => handleNavigation("/linkedin-analyze")}
+                    className="text-gray-300 hover:bg-gray-900 hover:text-white block px-3 py-2 rounded-md text-sm font-medium transition-colors duration-200 w-full text-center"
+                  >
+                    LinkedIn Analysis
                   </button>
                   <button
                     onClick={() => handleNavigation("/job-scraper")}
